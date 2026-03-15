@@ -1,0 +1,144 @@
+{% extends "users/basic.html" %}
+
+{% block title %}Admin Dashboard - BookMySeat{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <h2 class="section-title">Admin Dashboard</h2>
+  </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="row mb-4">
+  <div class="col-md-4 mb-3">
+    <div class="card bg-primary text-white h-100">
+      <div class="card-body">
+        <h5 class="card-title">Total Users</h5>
+        <h2>{{ total_users }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card bg-success text-white h-100">
+      <div class="card-body">
+        <h5 class="card-title">Total Revenue</h5>
+        <h2>₹{{ total_revenue }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card bg-info text-white h-100">
+      <div class="card-body">
+        <h5 class="card-title">Total Bookings</h5>
+        <h2>{{ total_bookings }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card bg-secondary text-white h-100">
+      <div class="card-body">
+        <h5 class="card-title">Movies</h5>
+        <h2>{{ total_movies }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card bg-warning text-dark h-100">
+      <div class="card-body">
+        <h5 class="card-title">Shows</h5>
+        <h2>{{ total_shows }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card bg-danger text-white h-100">
+      <div class="card-body">
+        <h5 class="card-title">Theaters</h5>
+        <h2>{{ total_theaters }}</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Recent Bookings</h4>
+        {% if recent_bookings %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>Booking ID</th>
+                <th>User</th>
+                <th>Movie</th>
+                <th>Time & Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for booking in recent_bookings %}
+              <tr>
+                <td><a href="{% url 'movies:booking_confirmation' booking.id %}" class="font-weight-bold">#{{ booking.id }}</a></td>
+                <td>{{ booking.user.username }}</td>
+                <td>{{ booking.show.movie.title }}</td>
+                <td>{{ booking.booking_time|date:"d M Y, h:i A" }}</td>
+                <td><span class="badge badge-success">{{ booking.status|title }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No recent bookings found.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popular Movies -->
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Popular Movies (by bookings)</h4>
+        <ul class="list-group list-group-flush">
+          {% for movie in all_movies_data|slice:":5" %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ movie.title }}
+            <span class="badge badge-primary badge-pill">{{ movie.booking_count }}</span>
+          </li>
+          {% empty %}
+          <li class="list-group-item">No data available</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Top Users</h4>
+        <ul class="list-group list-group-flush">
+          {% for u_stat in user_booking_stats|dictsortreversed:"total_spent"|slice:":5" %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ u_stat.user.username }}
+            <span>
+                <span class="badge badge-secondary mr-2">{{ u_stat.booking_count }} bookings</span>
+                <span class="font-weight-bold text-success">₹{{ u_stat.total_spent }}</span>
+            </span>
+          </li>
+          {% empty %}
+          <li class="list-group-item">No data available</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "users/basic.html" %}
+
+{% block title %}Logged Out — BookMySeat{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+  <i class="fas fa-sign-out-alt fa-3x mb-3" style="color: var(--bms-accent)"></i>
+  <h2 class="font-weight-bold">You have been logged out</h2>
+  <p class="text-muted mt-2">Thank you for using BookMySeat. See you next time!</p>
+  <a href="{% url 'login' %}" class="btn btn-bms btn-lg mt-3">
+    <i class="fas fa-sign-in-alt mr-2"></i> Log In Again
+  </a>
+</div>
+{% endblock %}

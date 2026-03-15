@@ -1,0 +1,171 @@
+{% extends "users/basic.html" %}
+
+{% block title %}Movies — BookMySeat{% endblock %}
+
+{% block extra_css %}
+.page-header {
+  background: var(--bms-gradient-1);
+  color: #fff;
+  padding: 40px 0 35px;
+  margin: -24px -15px 30px -15px;
+  border-radius: 0 0 24px 24px;
+  text-align: center;
+}
+.page-header h1 {
+  font-weight: 900;
+  font-size: 2.2rem;
+  letter-spacing: -0.5px;
+  margin-bottom: 5px;
+}
+.page-header p {
+  opacity: 0.7;
+  font-weight: 300;
+}
+.filter-bar {
+  background: #fff;
+  border-radius: var(--bms-border-radius);
+  padding: 22px 28px;
+  box-shadow: var(--bms-shadow-md);
+  margin-bottom: 30px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.filter-bar label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bms-text-muted);
+}
+.filter-bar select {
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: border-color 0.25s;
+}
+.filter-bar select:focus {
+  border-color: var(--bms-accent);
+  box-shadow: 0 0 0 3px var(--bms-accent-glow);
+}
+.movie-card {
+  position: relative;
+}
+.movie-card .card-img-top {
+  height: 320px;
+  object-fit: cover;
+}
+.movie-card .card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.movie-card .overlay-rating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  color: #fbbf24;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.movie-poster-placeholder {
+  height: 320px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.5);
+  font-size: 3.5rem;
+}
+.movie-count {
+  background: var(--bms-accent);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="fas fa-film mr-2"></i> Movies</h1>
+  <p>Discover and book tickets for the latest movies</p>
+</div>
+
+<div class="filter-bar">
+  <form method="GET" class="form-inline">
+    <div class="form-group mr-3 mb-2">
+      <label for="genre" class="mr-2">Genre:</label>
+      <select name="genre" id="genre" class="form-control">
+        <option value="">All Genres</option>
+        {% for value, label in genres %}
+        <option value="{{ value }}" {% if selected_genre == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group mr-3 mb-2">
+      <label for="language" class="mr-2">Language:</label>
+      <select name="language" id="language" class="form-control">
+        <option value="">All Languages</option>
+        {% for value, label in languages %}
+        <option value="{{ value }}" {% if selected_language == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-bms mb-2"><i class="fas fa-filter mr-1"></i> Filter</button>
+    {% if selected_genre or selected_language %}
+    <a href="{% url 'movies:movie_list' %}" class="btn btn-outline-secondary mb-2 ml-2">
+      <i class="fas fa-times mr-1"></i> Clear
+    </a>
+    {% endif %}
+  </form>
+</div>
+
+{% if movies %}
+<div class="row">
+  {% for movie in movies %}
+  <div class="col-lg-3 col-md-4 col-sm-6 mb-4" style="animation: fadeInUp 0.5s ease forwards; animation-delay: {{ forloop.counter0 }}00ms; opacity: 0">
+    <div class="card movie-card h-100">
+      {% if movie.poster %}
+      <div style="overflow: hidden">
+        <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
+      </div>
+      {% else %}
+      <div class="movie-poster-placeholder">
+        <i class="fas fa-film"></i>
+      </div>
+      {% endif %}
+      <span class="overlay-rating"><i class="fas fa-star mr-1"></i> {{ movie.rating }}</span>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title" title="{{ movie.title }}">{{ movie.title }}</h5>
+        <div class="mb-2">
+          <span class="badge-genre">{{ movie.get_genre_display }}</span>
+          <span class="badge-genre ml-1">{{ movie.get_language_display }}</span>
+        </div>
+        <div class="mb-2 text-muted" style="font-size: 0.85rem">
+          <i class="fas fa-clock mr-1"></i> {{ movie.duration_minutes }} min
+        </div>
+        <p class="text-muted small flex-grow-1" style="line-height: 1.6">{{ movie.description|truncatewords:18 }}</p>
+        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn btn-bms btn-sm mt-auto">
+          <i class="fas fa-ticket-alt mr-1"></i> Book Now
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+  <div style="font-size: 4rem; color: #ddd; margin-bottom: 15px"><i class="fas fa-search"></i></div>
+  <h4 class="text-muted">No movies found</h4>
+  <p class="text-muted">Try adjusting your filters or check back later.</p>
+</div>
+{% endif %}
+{% endblock %}

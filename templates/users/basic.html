@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}BookMySeat{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+      :root {
+        --bms-red: #e23744;
+        --bms-dark: #0f0f1a;
+        --bms-darker: #0a0a14;
+        --bms-accent: #e94560;
+        --bms-accent-glow: rgba(233, 69, 96, 0.25);
+        --bms-light: #f0f2f5;
+        --bms-card-bg: #ffffff;
+        --bms-text: #1a1a2e;
+        --bms-text-muted: #6c757d;
+        --bms-gradient-1: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+        --bms-gradient-accent: linear-gradient(135deg, #e23744, #e94560, #ff6b6b);
+        --bms-border-radius: 16px;
+        --bms-shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+        --bms-shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+        --bms-shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+        --bms-shadow-glow: 0 4px 25px var(--bms-accent-glow);
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background-color: var(--bms-light);
+        color: var(--bms-text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* ── Navbar ── */
+      .navbar {
+        padding: 12px 0;
+        background: var(--bms-gradient-1) !important;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        z-index: 1000;
+      }
+      .navbar-brand {
+        font-weight: 800;
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: -0.3px;
+      }
+      .navbar-brand .logo-box {
+        width: 38px;
+        height: 38px;
+        background: var(--bms-gradient-accent);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 900;
+        font-size: 15px;
+        box-shadow: var(--bms-shadow-glow);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .navbar-brand:hover .logo-box {
+        transform: rotate(-5deg) scale(1.08);
+      }
+      .nav-link {
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 8px 16px !important;
+        border-radius: 8px;
+        transition: all 0.25s ease;
+        position: relative;
+      }
+      .nav-link:hover {
+        color: #fff !important;
+        background: rgba(255,255,255,0.08);
+      }
+      .nav-link i {
+        transition: transform 0.2s;
+      }
+      .nav-link:hover i {
+        transform: scale(1.15);
+      }
+
+      /* ── Main Content ── */
+      .main-content {
+        flex: 1;
+      }
+
+      /* ── Section Titles ── */
+      .section-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 24px 0 20px;
+        color: var(--bms-text);
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-title::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(233,69,96,0.3), transparent);
+        margin-left: 15px;
+      }
+
+      /* ── Cards ── */
+      .card {
+        border: none;
+        border-radius: var(--bms-border-radius);
+        overflow: hidden;
+        box-shadow: var(--bms-shadow-md);
+        transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        background: var(--bms-card-bg);
+      }
+      .card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--bms-shadow-lg);
+      }
+      .card img {
+        height: 320px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+      .card:hover img {
+        transform: scale(1.03);
+      }
+      .card-body {
+        padding: 18px;
+      }
+
+      /* ── Buttons ── */
+      .btn-bms {
+        background: var(--bms-gradient-accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        letter-spacing: 0.2px;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: var(--bms-shadow-glow);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-bms::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+      }
+      .btn-bms:hover {
+        color: #fff;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 30px var(--bms-accent-glow);
+      }
+      .btn-bms:hover::before {
+        left: 100%;
+      }
+      .btn-bms:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      .btn-outline-dark {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 24px;
+        transition: all 0.25s;
+      }
+
+      /* ── Badges ── */
+      .badge-genre {
+        background: linear-gradient(135deg, var(--bms-dark), #2d2d44);
+        color: #fff;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      /* ── Rating ── */
+      .rating-star {
+        color: #fbbf24;
+      }
+      .rating-badge {
+        background: rgba(251, 191, 36, 0.12);
+        color: #d97706;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* ── Alerts ── */
+      .alert {
+        border-radius: 12px;
+        border: none;
+        font-weight: 500;
+      }
+
+      /* ── Movie Poster Placeholder ── */
+      .movie-poster-placeholder {
+        height: 320px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.6);
+        font-size: 3.5rem;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        background: var(--bms-gradient-1);
+        color: rgba(255,255,255,0.75);
+        padding: 50px 0 30px;
+        margin-top: auto;
+        border-top: 1px solid rgba(255,255,255,0.05);
+      }
+      .footer h5 {
+        color: #fff;
+        font-weight: 700;
+        margin-bottom: 18px;
+        font-size: 1.05rem;
+      }
+      .footer p, .footer li {
+        font-size: 0.9rem;
+        line-height: 1.8;
+      }
+      .footer a {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        transition: all 0.25s;
+      }
+      .footer a:hover {
+        color: var(--bms-accent);
+        text-decoration: none;
+        padding-left: 4px;
+      }
+      .footer .social-icons a {
+        display: inline-flex;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.08);
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        transition: all 0.3s;
+      }
+      .footer .social-icons a:hover {
+        background: var(--bms-accent);
+        transform: translateY(-3px);
+        padding-left: 0;
+      }
+      .footer .social-icons i {
+        font-size: 18px;
+        color: #fff;
+      }
+      .footer hr {
+        border-color: rgba(255,255,255,0.08);
+      }
+      .footer .copyright {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+      }
+
+      /* ── Scrollbar ── */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: var(--bms-light); }
+      ::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+      /* ── Animations ── */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-in {
+        animation: fadeInUp 0.5s ease forwards;
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 768px) {
+        .section-title { font-size: 1.3rem; }
+        .card img { height: 240px; }
+        .navbar-brand { font-size: 1.15rem; }
+      }
+
+      {% block extra_css %}{% endblock %}
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+          <span class="logo-box">B</span>
+          BookMySeat
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            {% if user.is_authenticated %}
+            {% if user.is_staff %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fas fa-chart-line mr-1"></i> Dashboard</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home mr-1"></i> Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'movies:movie_list' %}"><i class="fas fa-film mr-1"></i> Movies</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'movies:booking_history' %}"><i class="fas fa-ticket-alt mr-1"></i> My Bookings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'profile' %}"><i class="fas fa-user mr-1"></i> Profile</a>
+            </li>
+            <li class="nav-item">
+              <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="nav-link btn btn-link"
+                  style="border: none; background: none; cursor: pointer"
+                >
+                  <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+              </form>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt mr-1"></i> Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus mr-1"></i> Register</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <div class="container mt-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 mb-4 mb-md-0">
+            <h5><span style="color: var(--bms-accent)">Book</span>MySeat</h5>
+            <p>
+              Your ultimate destination for seamless movie ticket booking.
+              Experience cinema like never before — browse, select, and book in seconds.
+            </p>
+          </div>
+          <div class="col-md-4 mb-4 mb-md-0">
+            <h5>Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="{% url 'home' %}"><i class="fas fa-chevron-right mr-2" style="font-size: 0.7rem"></i>Home</a></li>
+              <li><a href="{% url 'movies:movie_list' %}"><i class="fas fa-chevron-right mr-2" style="font-size: 0.7rem"></i>Movies</a></li>
+              {% if user.is_authenticated %}
+              <li><a href="{% url 'movies:booking_history' %}"><i class="fas fa-chevron-right mr-2" style="font-size: 0.7rem"></i>My Bookings</a></li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Connect With Us</h5>
+            <div class="social-icons mb-3">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p class="mb-0" style="font-size: 0.85rem">
+              <i class="fas fa-envelope mr-2" style="color: var(--bms-accent)"></i>support@bookmyseat.com
+            </p>
+          </div>
+        </div>
+        <hr class="mt-4 mb-3" />
+        <div class="text-center copyright">
+          <p class="mb-0">&copy; 2026 BookMySeat. All rights reserved. Made with <i class="fas fa-heart" style="color: var(--bms-accent)"></i></p>
+        </div>
+      </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
