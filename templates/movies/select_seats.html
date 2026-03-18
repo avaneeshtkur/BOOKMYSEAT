@@ -1,230 +1,279 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
 {% block title %}Select Seats — {{ show.movie.title }} — BookMySeat{% endblock %}
 
-{% block extra_css %}
-.screen-container {
-  text-align: center;
-  margin-bottom: 30px;
-}
-.screen-label {
-  background: linear-gradient(90deg, transparent, rgba(233,69,96,0.5), transparent);
-  height: 5px;
-  border-radius: 50%;
-  margin: 0 auto 8px auto;
-  width: 65%;
-  box-shadow: 0 2px 15px rgba(233,69,96,0.2);
-}
-.screen-text {
-  color: #999;
-  font-size: 0.75rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin-bottom: 30px;
-  font-weight: 600;
-}
-.seat-map {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.seat-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.row-label {
-  width: 28px;
-  text-align: center;
-  font-weight: 700;
-  color: #999;
-  font-size: 0.8rem;
-}
-.seat {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px 8px 12px 12px;
-  border: 2px solid #e0e0e0;
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 600;
-  color: #bbb;
-}
-.seat:hover:not(.booked) {
-  border-color: var(--bms-accent);
-  background: rgba(233, 69, 96, 0.08);
-  transform: scale(1.1);
-  color: var(--bms-accent);
-}
-.seat.selected {
-  background: var(--bms-gradient-accent);
-  border-color: var(--bms-accent);
-  color: #fff;
-  transform: scale(1.08);
-  box-shadow: 0 2px 10px var(--bms-accent-glow);
-}
-.seat.booked {
-  background: #f0f0f0;
-  border-color: #e0e0e0;
-  color: #ccc;
-  cursor: not-allowed;
-}
-.legend {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin: 30px 0 10px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--bms-text-muted);
-}
-.legend-box {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  border: 2px solid #e0e0e0;
-}
-.legend-box.avail { background: #fff; }
-.legend-box.sel { background: var(--bms-accent); border-color: var(--bms-accent); }
-.legend-box.bkd { background: #f0f0f0; }
-.booking-summary {
-  background: #fff;
-  border-radius: var(--bms-border-radius);
-  padding: 28px;
-  box-shadow: var(--bms-shadow-md);
-  position: sticky;
-  top: 80px;
-  border: 1px solid rgba(0,0,0,0.04);
-}
-.booking-summary h5 {
-  font-weight: 800;
-  letter-spacing: -0.3px;
-}
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  font-size: 0.9rem;
-}
-.summary-row .label { color: var(--bms-text-muted); font-weight: 500; }
-.summary-row .value { font-weight: 600; }
-.total-row {
-  background: linear-gradient(135deg, #fef3f4, #fff5f5);
-  margin: 15px -28px;
-  padding: 18px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.total-row .label {
-  font-weight: 700;
-  font-size: 1rem;
-}
-.total-row .value {
-  font-weight: 900;
-  font-size: 1.4rem;
-  color: var(--bms-accent);
-  letter-spacing: -0.5px;
-}
-{% endblock %}
-
 {% block content %}
-<div class="row mt-4">
-  <!-- Seat Map -->
-  <div class="col-lg-8">
-    <div class="card p-4" style="box-shadow: var(--bms-shadow-md)">
-      <h4 class="font-weight-bold mb-1" style="letter-spacing: -0.3px">
-        <i class="fas fa-film mr-2" style="color: var(--bms-accent)"></i>
-        {{ show.movie.title }}
-      </h4>
-      <p class="text-muted mb-4" style="font-size: 0.85rem">
-        <i class="fas fa-building mr-1"></i> {{ show.screen.theater.name }} &bull;
-        <i class="fas fa-tv mr-1"></i> {{ show.screen.name }} &bull;
-        <i class="fas fa-calendar mr-1"></i> {{ show.show_date|date:"d M Y" }} &bull;
-        <i class="fas fa-clock mr-1"></i> {{ show.show_time|time:"h:i A" }}
-      </p>
+<div class="container py-4">
+  <div class="row g-4 justify-content-center">
 
-      <div class="screen-container">
-        <div class="screen-label"></div>
-        <div class="screen-text">Screen this way</div>
-      </div>
-
-      <div class="seat-map" id="seatMap">
-        {% for row in rows %}
-        <div class="seat-row">
-          <span class="row-label">{{ row.letter }}</span>
-          {% for seat in row.seats %}
-          <div
-            class="seat {% if seat.booked %}booked{% endif %}"
-            data-row="{{ row.letter }}"
-            data-number="{{ seat.number }}"
-            {% if not seat.booked %}onclick="toggleSeat(this)"{% endif %}
-          >
-            {{ seat.number }}
+    <!-- ── Seat Map ── -->
+    <div class="col-xl-8 col-lg-7">
+      <div class="seat-selection-card fade-in-up">
+        <div class="card-header-cinema">
+          <div class="d-flex align-items-center gap-3">
+            <div class="header-icon"><i class="fas fa-ticket-alt"></i></div>
+            <div>
+              <h4 class="cinema-title">{{ show.movie.title }}</h4>
+              <p class="cinema-meta">
+                {{ show.screen.theater.name }} • {{ show.screen.name }} • {{ show.show_date|date:"d M" }}, {{ show.show_time|time:"h:i A" }}
+              </p>
+            </div>
           </div>
-          {% endfor %}
-          <span class="row-label">{{ row.letter }}</span>
         </div>
-        {% endfor %}
-      </div>
 
-      <div class="legend">
-        <div class="legend-item"><div class="legend-box avail"></div> Available</div>
-        <div class="legend-item"><div class="legend-box sel"></div> Selected</div>
-        <div class="legend-item"><div class="legend-box bkd"></div> Booked</div>
+        <div class="seat-map-body">
+          <!-- Screen Visualization -->
+          <div class="screen-box">
+            <div class="screen-glow"></div>
+            <div class="screen-curve"></div>
+            <div class="screen-label">SCREEN</div>
+          </div>
+
+          <!-- Seat Grid -->
+          <div class="seat-map" id="seatMap">
+            {% for row in rows %}
+            <div class="seat-row">
+              <div class="row-label">{{ row.letter }}</div>
+              <div class="seats-group">
+                {% for seat in row.seats %}
+                <div
+                  class="seat {% if seat.booked %}booked{% endif %}"
+                  data-row="{{ row.letter }}"
+                  data-number="{{ seat.number }}"
+                  {% if not seat.booked %}onclick="toggleSeat(this)"{% endif %}
+                  title="{{ row.letter }}{{ seat.number }}"
+                >
+                  <span class="seat-num">{{ seat.number }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="row-label">{{ row.letter }}</div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Legend -->
+          <div class="seat-legend">
+            <div class="legend-item"><div class="legend-box avail"></div> <span class="d-none d-sm-inline">Available</span></div>
+            <div class="legend-item"><div class="legend-box sel"></div> <span class="d-none d-sm-inline">Selected</span></div>
+            <div class="legend-item"><div class="legend-box bkd"></div> <span class="d-none d-sm-inline">Booked</span></div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Booking Summary -->
-  <div class="col-lg-4 mt-4 mt-lg-0">
-    <div class="booking-summary">
-      <h5><i class="fas fa-receipt mr-2" style="color: var(--bms-accent)"></i> Booking Summary</h5>
-      <hr style="border-color: #f0f0f0">
-      <div class="summary-row"><span class="label">Movie</span><span class="value">{{ show.movie.title }}</span></div>
-      <div class="summary-row"><span class="label">Theater</span><span class="value">{{ show.screen.theater.name }}</span></div>
-      <div class="summary-row"><span class="label">Screen</span><span class="value">{{ show.screen.name }}</span></div>
-      <div class="summary-row"><span class="label">Date</span><span class="value">{{ show.show_date|date:"d M Y" }}</span></div>
-      <div class="summary-row"><span class="label">Time</span><span class="value">{{ show.show_time|time:"h:i A" }}</span></div>
-      <div class="summary-row"><span class="label">Price/seat</span><span class="value">₹{{ show.price }}</span></div>
-      <hr style="border-color: #f0f0f0">
-      <div class="summary-row">
-        <span class="label">Seats</span>
-        <span class="value" id="selectedSeatsList" style="color: var(--bms-text-muted); font-weight: 400">None</span>
+    <!-- ── Booking Summary ── -->
+    <div class="col-xl-4 col-lg-5">
+      <div class="booking-summary-card fade-in-up" style="animation-delay: 0.1s;">
+        <h5 class="summary-heading">Booking Summary</h5>
+        
+        <div class="summary-details">
+          <div class="summary-item">
+            <span class="s-label">Ticket Type</span>
+            <span class="s-value">Standard 2D</span>
+          </div>
+          <div class="summary-item">
+            <span class="s-label">Price per seat</span>
+            <span class="s-value">₹{{ show.price }}</span>
+          </div>
+          
+          <div class="summary-divider"></div>
+          
+          <div class="summary-item">
+            <span class="s-label">Selected Seats</span>
+            <span class="s-value seats-list" id="selectedSeatsList">None</span>
+          </div>
+          <div class="summary-item">
+            <span class="s-label">Total Seats</span>
+            <span class="s-value" id="seatCount">0</span>
+          </div>
+        </div>
+
+        <div class="total-strip">
+          <div class="total-label">Total Amount</div>
+          <div class="total-amount">₹<span id="totalPrice">0</span></div>
+        </div>
+        
+        <form method="POST" action="{% url 'movies:payment' %}" id="bookingForm" class="mt-4">
+          {% csrf_token %}
+          <input type="hidden" name="show_id" value="{{ show.id }}">
+          <input type="hidden" name="seats" id="seatsInput" value="[]">
+          <button type="submit" class="btn-bms w-100 btn-lg shadow-glow" id="confirmBtn" disabled>
+            Proceed to Payment <i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </form>
+        
+        <a href="{% url 'movies:movie_detail' show.movie.id %}" class="btn-ghost w-100 justify-content-center mt-3 text-center">
+          Back to Details
+        </a>
       </div>
-      <div class="summary-row">
-        <span class="label">Count</span>
-        <span class="value" id="seatCount">0</span>
-      </div>
-      <div class="total-row">
-        <span class="label">Total</span>
-        <span class="value">₹<span id="totalPrice">0</span></span>
-      </div>
-      <form method="POST" action="{% url 'movies:book_seats' %}" id="bookingForm">
-        {% csrf_token %}
-        <input type="hidden" name="show_id" value="{{ show.id }}">
-        <input type="hidden" name="seats" id="seatsInput" value="[]">
-        <button type="submit" class="btn btn-bms btn-lg btn-block" id="confirmBtn" disabled style="padding: 14px">
-          <i class="fas fa-check-circle mr-2"></i> Confirm Booking
-        </button>
-      </form>
-      <a href="{% url 'movies:movie_detail' show.movie.id %}" class="btn btn-outline-secondary btn-block mt-2">
-        <i class="fas fa-arrow-left mr-1"></i> Back
-      </a>
     </div>
+
   </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout & Cards ── */
+.seat-selection-card {
+  background: var(--bms-card-bg);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--bms-border);
+  box-shadow: var(--bms-shadow-md);
+  overflow: hidden;
+}
+.card-header-cinema {
+  background: linear-gradient(to right, rgba(229, 9, 20, 0.1), transparent);
+  border-bottom: 1px solid var(--bms-border);
+  padding: 24px 30px;
+}
+.header-icon {
+  width: 48px; height: 48px;
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--bms-accent);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+}
+.cinema-title { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; margin: 0 0 4px; color: var(--bms-text); }
+.cinema-meta { font-size: 0.85rem; color: var(--text-muted); margin: 0; font-weight: 500; }
+
+.seat-map-body {
+  padding: 40px 30px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.2));
+}
+
+/* ── Screen UI ── */
+.screen-box {
+  text-align: center;
+  margin-bottom: 50px;
+  position: relative;
+}
+.screen-glow {
+  position: absolute;
+  top: -20px; left: 10%; right: 10%; height: 40px;
+  background: var(--bms-accent);
+  filter: blur(30px); opacity: 0.15;
+  border-radius: 50%;
+}
+.screen-curve {
+  width: 80%; height: 8px;
+  margin: 0 auto;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+  box-shadow: 0 5px 15px rgba(255,255,255,0.1);
+}
+.screen-label {
+  margin-top: 15px; font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 6px; color: rgba(255,255,255,0.4); text-transform: uppercase;
+}
+
+/* ── Seat Grid ── */
+.seat-map {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  overflow-x: auto; padding-bottom: 20px;
+}
+.seat-row {
+  display: flex; align-items: center; gap: 16px;
+}
+.seats-group {
+  display: flex; gap: 8px;
+}
+.row-label {
+  width: 24px; text-align: center;
+  font-weight: 700; font-size: 0.8rem; color: var(--text-muted);
+}
+.seat {
+  width: 36px; height: 36px;
+  background: var(--bms-input-bg);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 8px 8px 12px 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.seat-num { font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.5); pointer-events: none; }
+
+/* Seat States */
+.seat:hover:not(.booked) {
+  border-color: var(--bms-accent);
+  background: rgba(229, 9, 20, 0.1);
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 4px 12px var(--bms-accent-glow);
+}
+.seat:hover:not(.booked) .seat-num { color: var(--bms-accent); }
+
+.seat.selected {
+  background: var(--bms-accent);
+  border-color: #ff4040;
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 6px 15px var(--bms-accent-glow);
+}
+.seat.selected .seat-num { color: #fff; }
+
+.seat.booked {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.05);
+  cursor: not-allowed;
+}
+.seat.booked .seat-num { color: transparent; }
+.seat.booked::after {
+  content: '\f00d'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+  color: rgba(255,255,255,0.2); font-size: 0.8rem; position: absolute;
+}
+
+/* ── Legend ── */
+.seat-legend {
+  display: flex; justify-content: center; gap: 30px;
+  margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--bms-border);
+}
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+.legend-box { width: 24px; height: 24px; border-radius: 6px; border: 2px solid transparent; }
+.legend-box.avail { background: var(--bms-input-bg); border-color: rgba(255,255,255,0.1); }
+.legend-box.sel { background: var(--bms-accent); border-color: #ff4040; box-shadow: 0 2px 8px var(--bms-accent-glow); }
+.legend-box.bkd { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); position: relative; }
+.legend-box.bkd::after {
+  content: '\f00d'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+  color: rgba(255,255,255,0.2); font-size: 0.6rem; position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+}
+
+/* ── Summary Card ── */
+.booking-summary-card {
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  padding: 32px; position: sticky; top: 100px;
+  box-shadow: var(--bms-shadow-md);
+}
+.summary-heading { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; margin-bottom: 24px; color: var(--bms-text); }
+
+.summary-details { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+.s-label { color: var(--text-muted); font-weight: 500; }
+.s-value { font-weight: 700; color: var(--bms-text); text-align: right; }
+.seats-list { color: var(--bms-accent); max-width: 140px; word-wrap: break-word; }
+
+.summary-divider { height: 1px; background: dashed rgba(255,255,255,0.1) 1px; margin: 8px 0; border-top: 1px dashed var(--bms-border); }
+
+.total-strip {
+  background: rgba(229, 9, 20, 0.08);
+  border: 1px solid rgba(229, 9, 20, 0.2);
+  border-radius: 12px; padding: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.total-label { font-weight: 700; color: var(--bms-text); }
+.total-amount { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 900; color: var(--bms-accent); letter-spacing: -0.5px; }
+
+@media (max-width: 768px) {
+  .seat { width: 28px; height: 28px; border-radius: 6px 6px 8px 8px; }
+  .seat-num { font-size: 0.6rem; }
+  .seats-group { gap: 4px; }
+  .seat-map-body { padding: 30px 15px; }
+  .card-header-cinema { padding: 20px 15px; }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -236,39 +285,45 @@
     const row = el.dataset.row;
     const number = parseInt(el.dataset.number);
     const idx = selectedSeats.findIndex(s => s.row === row && s.number === number);
-
+    
     if (idx > -1) {
       selectedSeats.splice(idx, 1);
       el.classList.remove('selected');
     } else {
-      selectedSeats.push({row: row, number: number});
+      selectedSeats.push({row, number});
       el.classList.add('selected');
     }
+    
+    // Add subtle pop animation to the entire grid to make it feel alive
+    const grid = document.getElementById('seatMap');
+    grid.style.transform = 'scale(0.998)';
+    setTimeout(() => grid.style.transform = 'scale(1)', 150);
+    
     updateSummary();
   }
 
   function updateSummary() {
     const count = selectedSeats.length;
     const total = count * PRICE;
-
+    
+    // Animations for numbers
     document.getElementById('seatCount').textContent = count;
     document.getElementById('totalPrice').textContent = total.toFixed(2);
     document.getElementById('seatsInput').value = JSON.stringify(selectedSeats);
-
+    
     const btn = document.getElementById('confirmBtn');
     btn.disabled = count === 0;
-
+    
+    const el = document.getElementById('selectedSeatsList');
     if (count > 0) {
       const labels = selectedSeats
-        .sort((a, b) => a.row.localeCompare(b.row) || a.number - b.number)
+        .sort((a,b) => a.row.localeCompare(b.row) || a.number - b.number)
         .map(s => s.row + s.number);
-      document.getElementById('selectedSeatsList').textContent = labels.join(', ');
-      document.getElementById('selectedSeatsList').style.color = 'var(--bms-accent)';
-      document.getElementById('selectedSeatsList').style.fontWeight = '600';
+      el.textContent = labels.join(', ');
+      el.style.color = 'var(--bms-accent)';
     } else {
-      document.getElementById('selectedSeatsList').textContent = 'None';
-      document.getElementById('selectedSeatsList').style.color = 'var(--bms-text-muted)';
-      document.getElementById('selectedSeatsList').style.fontWeight = '400';
+      el.textContent = 'None';
+      el.style.color = 'var(--text-muted)';
     }
   }
 </script>

@@ -1,0 +1,416 @@
+{% extends "users/basic.html" %}
+{% load static %}
+
+{% block title %}Payment — {{ show.movie.title }} — BookMySeat{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Progress Header -->
+  <div class="row justify-content-center mb-5 fade-in-up">
+    <div class="col-md-8 text-center">
+      <h2 class="section-title justify-content-center mb-2">Complete Your Booking</h2>
+      <p class="text-muted">You're almost there! Choose a payment method to confirm your seats.</p>
+      
+      <!-- Stepper -->
+      <div class="d-flex justify-content-center align-items-center mt-4" style="max-width:400px; margin:0 auto;">
+        <div class="d-flex flex-column align-items-center" style="opacity: 0.5;">
+          <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:0.8rem;"><i class="fas fa-check"></i></div>
+          <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Seats</span>
+        </div>
+        <div style="flex:1; height:2px; background:rgba(255,255,255,0.1); margin:0 15px 20px;"></div>
+        <div class="d-flex flex-column align-items-center">
+          <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:0.8rem; background:var(--bms-accent); color:#fff; box-shadow:0 0 15px var(--bms-accent-glow);"><i class="fas fa-credit-card"></i></div>
+          <span class="mt-2 text-white" style="font-size:0.75rem;font-weight:600;">Payment</span>
+        </div>
+        <div style="flex:1; height:2px; background:rgba(255,255,255,0.1); margin:0 15px 20px;"></div>
+        <div class="d-flex flex-column align-items-center" style="opacity: 0.5;">
+          <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:0.8rem;">3</div>
+          <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Ticket</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-wrap">
+    <!-- ── Payment Methods Area ── -->
+    <div class="payment-methods fade-in-up" style="animation-delay: 0.1s;">
+      <div class="glass-panel">
+        <h4 class="panel-title"><i class="fas fa-wallet"></i> Payment Method</h4>
+
+        <div class="pay-tabs">
+          <div class="pay-tab active" data-target="cardPane"><i class="far fa-credit-card mb-2 d-block" style="font-size:1.2rem;"></i>Card</div>
+          <div class="pay-tab" data-target="upiPane"><i class="fas fa-qrcode mb-2 d-block" style="font-size:1.2rem;"></i>UPI</div>
+          <div class="pay-tab" data-target="netPane"><i class="fas fa-university mb-2 d-block" style="font-size:1.2rem;"></i>Net Banking</div>
+        </div>
+
+        <!-- Card Section -->
+        <div id="cardPane" class="pay-pane active">
+          <!-- Interactive Card Visual -->
+          <div class="card-visual">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div class="card-visually-chip"></div>
+              <div style="font-size:1.5rem; opacity:0.8;"><i class="fab fa-cc-visa"></i></div>
+            </div>
+            <div class="card-visually-number" id="vCardNum">#### #### #### ####</div>
+            <div class="card-visually-bottom mt-4">
+              <div>
+                <span class="lbl">Card Holder</span>
+                <span class="val" id="vCardName">YOUR NAME</span>
+              </div>
+              <div class="text-end">
+                <span class="lbl">Expires</span>
+                <span class="val" id="vCardExp">MM/YY</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Card Number</label>
+              <div class="input-group-custom">
+                <i class="far fa-credit-card"></i>
+                <input type="text" class="pay-input has-icon" id="inpCardNum" placeholder="0000 0000 0000 0000" maxlength="19">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Card Holder Name</label>
+              <div class="input-group-custom">
+                <i class="far fa-user"></i>
+                <input type="text" class="pay-input has-icon" id="inpCardName" placeholder="e.g. John Doe">
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Expiry Date</label>
+              <input type="text" class="pay-input" id="inpCardExp" placeholder="MM/YY" maxlength="5">
+            </div>
+            <div class="col-6">
+              <label class="form-label">CVV</label>
+              <div class="input-group-custom">
+                <i class="fas fa-lock text-muted" style="font-size:0.8rem;"></i>
+                <input type="password" class="pay-input has-icon" placeholder="•••" maxlength="4">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPI Section -->
+        <div id="upiPane" class="pay-pane">
+          <div class="upi-qr">
+            <div class="qr-box">
+               <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=bookmyseat@okaxis&pn=BookMySeat&am={{ total_price }}&cu=INR" alt="QR Code" />
+            </div>
+            <h5 class="text-white fw-bold mb-2">Scan with any UPI App</h5>
+            <p class="text-muted small mb-4">Open Google Pay, PhonePe, or Paytm and scan to pay.</p>
+            
+            <div class="d-flex align-items-center my-3">
+               <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+               <div class="px-3 text-muted small fw-bold">OR</div>
+               <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+            </div>
+            
+            <label class="form-label text-start w-100">Enter UPI ID</label>
+            <div class="input-group-custom">
+              <i class="fas fa-at"></i>
+              <input type="text" class="pay-input has-icon text-start" placeholder="username@upi">
+            </div>
+          </div>
+        </div>
+
+        <!-- Net Banking Section -->
+        <div id="netPane" class="pay-pane">
+          <label class="form-label mb-3">Select your Bank</label>
+          <div class="bank-grid mb-4">
+            <div class="bank-option"><i class="fas fa-building mb-2 fs-4"></i><br>SBI</div>
+            <div class="bank-option"><i class="fas fa-building mb-2 fs-4"></i><br>HDFC</div>
+            <div class="bank-option"><i class="fas fa-building mb-2 fs-4"></i><br>ICICI</div>
+            <div class="bank-option"><i class="fas fa-building mb-2 fs-4"></i><br>Axis</div>
+          </div>
+          
+          <select class="pay-input" style="height:50px;">
+            <option value="" disabled selected>Other Banks...</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+            <option>Bank of Baroda</option>
+          </select>
+          <div class="alert mt-4 d-flex align-items-center" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-size:0.85rem;">
+            <i class="fas fa-info-circle me-3 fs-4 text-primary"></i>
+            <div>You will be securely redirected to your bank's portal to complete the payment.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Summary Area ── -->
+    <div class="payment-summary fade-in-up" style="animation-delay: 0.2s;">
+      <div class="glass-panel" style="position:sticky; top:100px;">
+        <h4 class="panel-title"><i class="fas fa-receipt"></i> Order Summary</h4>
+
+        <div class="ticket-preview mb-4">
+          <div class="d-flex gap-3">
+            {% if show.movie.poster %}
+            <img src="{{ show.movie.poster.url }}" alt="{{ show.movie.title }}" class="rounded shadow-sm" style="width:60px; height:85px; object-fit:cover;">
+            {% else %}
+            <div class="rounded bg-secondary d-flex align-items-center justify-content-center" style="width:60px; height:85px;"><i class="fas fa-film text-white-50"></i></div>
+            {% endif %}
+            
+            <div>
+              <h6 class="fw-bold text-white mb-1">{{ show.movie.title }}</h6>
+              <div class="text-muted small mb-1">{{ show.screen.theater.name }} ({{ show.screen.name }})</div>
+              <div class="text-white-50 small"><i class="far fa-calendar-alt me-1"></i> {{ show.show_date|date:"d M Y" }} &bull; {{ show.show_time|time:"h:i A" }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-details">
+          <div class="summary-row">
+            <span class="s-label">Ticket Type</span>
+            <span class="s-val">Standard 2D</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Seats ({{ valid_seats|length }})</span>
+            <span class="s-val fw-bold" style="color:var(--bms-text);">
+              {% for seat in valid_seats %}{{ seat.0 }}{{ seat.1 }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Price per seat</span>
+            <span class="s-val">₹{{ show.price }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Convenience Fee</span>
+            <span class="s-val text-success">Waived</span>
+          </div>
+        </div>
+
+        <div class="total-strip">
+          <div class="total-label text-white">Amount Payable</div>
+          <div class="total-amount">₹{{ total_price }}</div>
+        </div>
+
+        <!-- Actual Hidden Form that submits to the Real Booking Endpoint -->
+        <form id="realPaymentForm" action="{% url 'movies:book_seats' %}" method="POST" class="mt-4">
+          {% csrf_token %}
+          <input type="hidden" name="show_id" value="{{ show_id }}">
+          <input type="hidden" name="seats" value="{{ seats_json }}">
+          <button type="submit" class="btn-bms w-100 btn-pay shadow-glow" id="btnPay">
+            <i class="fas fa-lock me-2"></i> Pay ₹{{ total_price }} Securely
+          </button>
+        </form>
+
+        <div class="text-center mt-3 text-muted" style="font-size:0.75rem;">
+          <i class="fas fa-shield-alt me-1 text-success"></i> Safe & Secure 256-bit Encryption
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout ── */
+.payment-wrap { max-width: 1000px; margin: 0 auto; display: flex; gap: 30px; align-items: flex-start; }
+.payment-methods { flex: 1; min-width: 0; }
+.payment-summary { width: 380px; flex-shrink: 0; }
+
+.glass-panel {
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--bms-shadow-md);
+}
+.panel-title {
+  font-family: var(--font-heading);
+  font-weight: 800; font-size: 1.3rem;
+  color: var(--bms-text); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.panel-title i { color: var(--bms-accent); }
+
+/* ── Tabs ── */
+.pay-tabs { display: flex; gap: 12px; margin-bottom: 30px; }
+.pay-tab {
+  flex: 1; text-align: center; padding: 16px 12px;
+  background: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-weight: 600; font-size: 0.9rem;
+}
+.pay-tab:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+.pay-tab.active {
+  background: rgba(229, 9, 20, 0.1);
+  border-color: rgba(229, 9, 20, 0.3);
+  color: var(--bms-accent);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.1);
+}
+
+.pay-pane { display: none; animation: fadeInUp 0.4s ease both; }
+.pay-pane.active { display: block; }
+
+/* ── Forms ── */
+.form-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.input-group-custom { position: relative; display: flex; align-items: center; }
+.input-group-custom i { position: absolute; left: 16px; color: var(--text-muted); z-index: 2; pointer-events: none; }
+.pay-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: 8px;
+  color: var(--bms-text); font-size: 1rem;
+  transition: all 0.3s;
+}
+.pay-input.has-icon { padding-left: 44px; }
+.pay-input:focus { border-color: var(--bms-accent); outline: none; box-shadow: 0 0 0 2px var(--bms-accent-glow); background: #333; }
+
+/* ── Interactive Card Visual ── */
+.card-visual {
+  background: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%);
+  border-radius: 16px; padding: 24px 30px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  margin-bottom: 30px; position: relative; overflow: hidden;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.card-visual::before {
+  content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.card-visually-chip { width: 45px; height: 32px; background: linear-gradient(135deg, #e0e0e0, #9e9e9e); border-radius: 6px; position: relative; overflow: hidden;}
+.card-visually-chip::after { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:rgba(0,0,0,0.2); }
+.card-visually-chip::before { content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:rgba(0,0,0,0.2); }
+.card-visually-number { font-family: 'Inter', monospace; font-size: clamp(1.2rem, 3vw, 1.6rem); letter-spacing: 3px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.card-visually-bottom { display: flex; justify-content: space-between; }
+.card-visually-bottom .lbl { display: block; font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; letter-spacing: 1px; }
+.card-visually-bottom .val { display: block; color: #fff; font-weight: 600; font-size: 1.05rem; letter-spacing: 1px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); text-transform: uppercase; }
+
+/* ── UPI ── */
+.upi-qr { text-align: center; }
+.qr-box { 
+  background: #fff; width: 190px; height: 190px; margin: 0 auto 20px; 
+  border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 15px;
+}
+.qr-box img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ── Net Banking ── */
+.bank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.bank-option {
+  background: var(--bms-input-bg); border: 1px solid var(--bms-border); border-radius: 12px;
+  padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s;
+  color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+}
+.bank-option:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+/* ── Summary Pane ── */
+.ticket-preview {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px; padding: 16px;
+}
+.summary-details { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed var(--bms-border); }
+.summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+.s-label { color: var(--text-muted); }
+.s-val { color: var(--bms-text); font-weight: 600; text-align: right; }
+
+.total-strip {
+  background: rgba(229, 9, 20, 0.1); border: 1px solid rgba(229, 9, 20, 0.2);
+  padding: 20px; border-radius: 12px; 
+  display: flex; justify-content: space-between; align-items: center;
+}
+.total-strip .s-total { font-size: 1.5rem; font-weight: 800; color: var(--bms-accent); font-family: var(--font-heading); }
+
+.btn-pay { padding: 16px; font-size: 1.05rem; letter-spacing: 0.5px; }
+
+@media (max-width: 991px) {
+  .payment-wrap { flex-direction: column; }
+  .payment-summary { width: 100%; order: -1; margin-bottom: 20px; }
+  .glass-panel { padding: 24px; }
+}
+@media (max-width: 576px) {
+  .pay-tabs { flex-direction: column; gap: 8px; }
+  .bank-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-visual { padding: 20px; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab Switching logic
+  const tabs = document.querySelectorAll('.pay-tab');
+  const panes = document.querySelectorAll('.pay-pane');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
+
+  // Card Visualizer logic
+  const inpNum = document.getElementById('inpCardNum');
+  const vNum = document.getElementById('vCardNum');
+  inpNum.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    val = val.replace(/(.{4})/g, '$1 ').trim();
+    e.target.value = val;
+    vNum.textContent = val || '#### #### #### ####';
+  });
+
+  const inpName = document.getElementById('inpCardName');
+  const vName = document.getElementById('vCardName');
+  inpName.addEventListener('input', (e) => {
+    vName.textContent = e.target.value.substring(0,20) || 'YOUR NAME';
+  });
+
+  const inpExp = document.getElementById('inpCardExp');
+  const vExp = document.getElementById('vCardExp');
+  inpExp.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 2) { val = val.substring(0,2) + '/' + val.substring(2,4); }
+    e.target.value = val;
+    vExp.textContent = val || 'MM/YY';
+  });
+
+  // Payment simulation effect
+  const btn = document.getElementById('btnPay');
+  const form = document.getElementById('realPaymentForm');
+  
+  if (btn && form) {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const activeTab = document.querySelector('.pay-pane.active').id;
+      if (activeTab === 'cardPane') {
+        if (!inpNum.value || !inpName.value || !inpExp.value) {
+          // highlight empty fields
+          document.querySelectorAll('#cardPane .pay-input').forEach(inp => {
+            if(!inp.value) {
+              inp.style.borderColor = 'red';
+              setTimeout(()=>inp.style.borderColor='', 2000);
+            }
+          });
+          return;
+        }
+      }
+      
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Processing Securely...';
+      btn.style.opacity = '0.9';
+      btn.disabled = true;
+
+      // Simulate Network delay for "realism" before actual submit
+      setTimeout(() => {
+        form.submit();
+      }, 2000);
+    });
+  }
+</script>
+{% endblock %}

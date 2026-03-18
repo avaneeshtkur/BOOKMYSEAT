@@ -1,144 +1,181 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
-{% block title %}My Bookings — BookMySeat{% endblock %}
-
-{% block extra_css %}
-.page-header-sm {
-  background: var(--bms-gradient-1);
-  color: #fff;
-  padding: 35px 0 30px;
-  margin: -24px -15px 30px -15px;
-  border-radius: 0 0 24px 24px;
-  text-align: center;
-}
-.page-header-sm h1 {
-  font-weight: 900;
-  font-size: 2rem;
-  letter-spacing: -0.5px;
-}
-.booking-table {
-  background: #fff;
-  border-radius: var(--bms-border-radius);
-  overflow: hidden;
-  box-shadow: var(--bms-shadow-md);
-  border: 1px solid rgba(0,0,0,0.04);
-}
-.booking-table thead {
-  background: var(--bms-gradient-1);
-  color: #fff;
-}
-.booking-table thead th {
-  padding: 16px 18px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: none;
-}
-.booking-table tbody tr {
-  transition: background 0.2s;
-}
-.booking-table tbody tr:hover {
-  background: #fafafa;
-}
-.booking-table tbody td {
-  padding: 16px 18px;
-  vertical-align: middle;
-  border-color: #f5f5f5;
-}
-.seat-badge {
-  background: linear-gradient(135deg, var(--bms-dark), #2d2d44);
-  color: #fff;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  display: inline-block;
-  margin: 1px;
-}
-.status-confirmed {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-.status-cancelled {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: #fff;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-{% endblock %}
+{% block title %}My Tickets — BookMySeat{% endblock %}
 
 {% block content %}
-<div class="page-header-sm">
-  <h1><i class="fas fa-ticket-alt mr-2"></i> My Bookings</h1>
-  <p style="opacity: 0.7; font-weight: 300">All your movie ticket bookings in one place</p>
+<div class="page-header py-5 mb-4 text-center">
+  <div class="container">
+    <h1 class="fw-bold" style="font-family: var(--font-heading);"><i class="fas fa-ticket-alt me-3" style="color:var(--bms-accent)"></i>My Tickets</h1>
+    <p class="text-muted">A timeline of your cinematic journeys</p>
+  </div>
 </div>
 
+<div class="container pb-5" style="max-width: 900px;">
 {% if bookings %}
-<div class="table-responsive" style="animation: fadeInUp 0.5s ease">
-  <table class="table booking-table mb-5">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Movie</th>
-        <th>Theater</th>
-        <th>Date & Time</th>
-        <th>Seats</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Booked On</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for booking in bookings %}
-      <tr>
-        <td>
-          <a href="{% url 'movies:booking_confirmation' booking.id %}" class="font-weight-bold" style="color: var(--bms-accent); text-decoration: none">
-            #{{ booking.id }}
-          </a>
-        </td>
-        <td class="font-weight-bold">{{ booking.show.movie.title }}</td>
-        <td>
-          {{ booking.show.screen.theater.name }}
-          <br><small class="text-muted">{{ booking.show.screen.name }}</small>
-        </td>
-        <td>
-          {{ booking.show.show_date|date:"d M Y" }}
-          <br><small class="text-muted">{{ booking.show.show_time|time:"h:i A" }}</small>
-        </td>
-        <td>
-          {% for seat in booking.seats.all %}
-          <span class="seat-badge">{{ seat.row_letter }}{{ seat.seat_number }}</span>
-          {% endfor %}
-        </td>
-        <td class="font-weight-bold" style="color: var(--bms-text)">₹{{ booking.total_price }}</td>
-        <td>
-          {% if booking.status == "confirmed" %}
-          <span class="status-confirmed">✓ Confirmed</span>
-          {% else %}
-          <span class="status-cancelled">✗ Cancelled</span>
-          {% endif %}
-        </td>
-        <td><small class="text-muted">{{ booking.booking_time|date:"d M Y, h:i A" }}</small></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+  <div class="booking-timeline">
+    {% for booking in bookings %}
+    <div class="booking-card fade-in-up" style="animation-delay:{{ forloop.counter0 }}00ms">
+      
+      <!-- Date Badge Sidebar -->
+      <div class="date-sidebar">
+        <div class="month">{{ booking.show.show_date|date:"M" }}</div>
+        <div class="day">{{ booking.show.show_date|date:"d" }}</div>
+        <div class="year">{{ booking.show.show_date|date:"Y" }}</div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="booking-content">
+        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="movie-title mb-1">{{ booking.show.movie.title }}</h5>
+            <div class="text-muted small">
+              <i class="fas fa-building me-1"></i> {{ booking.show.screen.theater.name }} 
+              <span class="mx-1">•</span>
+              <i class="fas fa-tv me-1"></i> {{ booking.show.screen.name }}
+            </div>
+          </div>
+          <div class="text-end">
+            {% if booking.status == "confirmed" %}
+            <span class="status-badge confirmed"><i class="fas fa-check-circle me-1"></i> Confirmed</span>
+            {% else %}
+            <span class="status-badge cancelled"><i class="fas fa-times-circle me-1"></i> Cancelled</span>
+            {% endif %}
+            <div class="booking-id mt-2">ID: #{{ booking.id }}</div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-4 mt-3 pt-3 border-top border-secondary border-opacity-25">
+          <div>
+            <div class="text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">Show Time</div>
+            <div class="fw-bold text-white">{{ booking.show.show_time|time:"h:i A" }}</div>
+          </div>
+          
+          <div>
+            <div class="text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">Seats ({{ booking.seats.all|length }})</div>
+            <div class="seat-badges">
+              {% for seat in booking.seats.all %}
+              <span class="seat-pill">{{ seat.row_letter }}{{ seat.seat_number }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div class="ms-auto text-end">
+            <div class="text-uppercase text-muted" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">Total Paid</div>
+            <div class="fw-bold price-total">₹{{ booking.total_price }}</div>
+          </div>
+        </div>
+
+      </div>
+      
+      <!-- Action Hover (optional view ticket button) -->
+      {% if booking.status == "confirmed" %}
+      <a href="{% url 'movies:booking_confirmation' booking.id %}" class="view-ticket-btn" title="View Ticket">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
 {% else %}
-<div class="text-center py-5" style="animation: fadeInUp 0.5s ease">
-  <div style="font-size: 4rem; color: #ddd; margin-bottom: 15px"><i class="fas fa-ticket-alt"></i></div>
-  <h4 class="text-muted" style="font-weight: 700">No bookings yet</h4>
-  <p class="text-muted">Start by browsing movies and booking your first ticket!</p>
-  <a href="{% url 'movies:movie_list' %}" class="btn btn-bms mt-2" style="padding: 12px 32px">
-    <i class="fas fa-film mr-1"></i> Browse Movies
+<div class="empty-state text-center py-5 fade-in-up">
+  <div class="empty-icon mb-4"><i class="fas fa-ticket-alt"></i></div>
+  <h3 class="text-white fw-bold mb-2" style="font-family: var(--font-heading);">No Tickets Found</h3>
+  <p class="text-muted mb-4">You haven't booked any movies yet. Let's change that!</p>
+  <a href="{% url 'movies:movie_list' %}" class="btn-bms shadow-glow">
+    <i class="fas fa-film me-2"></i> Browse Movies
   </a>
 </div>
 {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.booking-timeline {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.booking-card {
+  display: flex;
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.booking-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(229, 9, 20, 0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* ── Date Sidebar ── */
+.date-sidebar {
+  background: rgba(255,255,255,0.03);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-right: 1px dashed rgba(255,255,255,0.1);
+  min-width: 100px;
+}
+.date-sidebar .month { font-size: 0.85rem; text-transform: uppercase; font-weight: 700; color: var(--bms-accent); letter-spacing: 1px; }
+.date-sidebar .day { font-family: var(--font-heading); font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1; margin: 4px 0; }
+.date-sidebar .year { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+/* ── Content ── */
+.booking-content {
+  padding: 24px 30px;
+  flex: 1;
+}
+.movie-title {
+  font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem;
+  color: #fff;
+}
+.booking-id {
+  font-family: 'Inter', monospace; font-size: 0.8rem; color: var(--text-muted);
+}
+
+.status-badge {
+  display: inline-flex; align-items: center;
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.status-badge.confirmed { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.status-badge.cancelled { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.seat-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.seat-pill {
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  color: var(--bms-accent);
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 0.75rem; font-weight: 700;
+}
+.price-total { font-family: var(--font-heading); font-size: 1.3rem; color: var(--bms-text); letter-spacing: -0.5px; }
+
+/* ── View Ticket Button Link ── */
+.view-ticket-btn {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 50px;
+  background: rgba(229, 9, 20, 0.05);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--bms-accent); font-size: 1.2rem;
+  opacity: 0; transition: all 0.3s;
+  text-decoration: none;
+  border-left: 1px solid rgba(255,255,255,0.05);
+}
+.booking-card:hover .view-ticket-btn { opacity: 1; }
+.view-ticket-btn:hover { background: var(--bms-accent); color: #fff; }
+
+.empty-icon { font-size: 5rem; color: rgba(255,255,255,0.05); }
+
+@media (max-width: 576px) {
+  .booking-card { flex-direction: column; }
+  .date-sidebar { border-right: none; border-bottom: 1px dashed rgba(255,255,255,0.1); padding: 16px; flex-direction: row; gap: 12px; }
+  .date-sidebar .day { margin: 0; }
+  .booking-content { padding: 20px; }
+  .view-ticket-btn { display: none; }
+}
+</style>
 {% endblock %}

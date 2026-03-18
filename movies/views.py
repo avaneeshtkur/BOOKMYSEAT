@@ -3,23 +3,69 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.db.models import Count
+from django.core.paginator import Paginator
 from .models import Movie, Show, Booking, SeatBooking
+from .tasks import send_booking_confirmation_email
 
 
 def movie_list(request):
-    movies = Movie.objects.all().order_by("-release_date")
-    genre = request.GET.get("genre")
-    language = request.GET.get("language")
-    if genre:
-        movies = movies.filter(genre=genre)
-    if language:
-        movies = movies.filter(language=language)
+    sort_param = request.GET.get("sort", "-release_date")
+    valid_sorts = ["-release_date", "release_date", "-rating", "rating", "title", "-title"]
+    
+    if sort_param in valid_sorts:
+        movies = Movie.objects.all().order_by(sort_param)
+    else:
+        movies = Movie.objects.all().order_by("-release_date")
+        sort_param = "-release_date"
+    
+    # Support for multi-select filtering
+    selected_genres = request.GET.getlist("genre")
+    selected_languages = request.GET.getlist("language")
+    
+    # Base queryset for faceting (aggregation)
+    base_qs = movies
+
+    if selected_genres:
+        movies = movies.filter(genre__in=selected_genres)
+    if selected_languages:
+        movies = movies.filter(language__in=selected_languages)
+        
+    # Dynamic Faceting (Counts)
+    # How many movies exist for each genre based on current language filters?
+    genre_counts_qs = base_qs
+    if selected_languages:
+        genre_counts_qs = genre_counts_qs.filter(language__in=selected_languages)
+    genre_counts = dict(genre_counts_qs.values_list("genre").annotate(c=Count("id")))
+
+    # How many movies exist for each language based on current genre filters?
+    language_counts_qs = base_qs
+    if selected_genres:
+        language_counts_qs = language_counts_qs.filter(genre__in=selected_genres)
+    language_counts = dict(language_counts_qs.values_list("language").annotate(c=Count("id")))
+
+    # Build final list of choices with dynamic counts
+    genres_with_counts = [
+        {"value": code, "label": label, "count": genre_counts.get(code, 0)}
+        for code, label in Movie.GENRE_CHOICES
+    ]
+    languages_with_counts = [
+        {"value": code, "label": label, "count": language_counts.get(code, 0)}
+        for code, label in Movie.LANGUAGE_CHOICES
+    ]
+    
+    # Pagination configuration
+    paginator = Paginator(movies, 12)  # 12 movies per page
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
     return render(request, "movies/movie_list.html", {
-        "movies": movies,
-        "genres": Movie.GENRE_CHOICES,
-        "languages": Movie.LANGUAGE_CHOICES,
-        "selected_genre": genre or "",
-        "selected_language": language or "",
+        "page_obj": page_obj,
+        "genres": genres_with_counts,
+        "languages": languages_with_counts,
+        "selected_genres": selected_genres,
+        "selected_languages": selected_languages,
+        "selected_sort": sort_param,
     })
 
 
@@ -66,6 +112,50 @@ def select_seats(request, show_id):
 
 @login_required
 @require_POST
+def payment(request):
+    show_id = request.POST.get("show_id")
+    seats_json = request.POST.get("seats", "[]")
+
+    try:
+        selected_seats = json.loads(seats_json)
+    except json.JSONDecodeError:
+        selected_seats = []
+
+    if not selected_seats or not show_id:
+        return redirect("movies:movie_list")
+
+    show = get_object_or_404(Show, pk=show_id)
+
+    # Re-verify seats aren't booked
+    booked = set()
+    for sb in SeatBooking.objects.filter(
+        booking__show=show, booking__status="confirmed"
+    ):
+        booked.add((sb.row_letter, sb.seat_number))
+
+    valid_seats = []
+    for seat in selected_seats:
+        key = (seat["row"], int(seat["number"]))
+        if key not in booked:
+            valid_seats.append(key)
+
+    if not valid_seats:
+        return redirect("movies:select_seats", show_id=show.pk)
+
+    total_price = len(valid_seats) * show.price
+
+    # Pass the validated data forward to the hidden form on payment page
+    return render(request, "movies/payment.html", {
+        "show": show,
+        "valid_seats": valid_seats,
+        "total_price": total_price,
+        "seats_json": json.dumps([{"row": r, "number": n} for r, n in valid_seats]),
+        "show_id": show_id,
+    })
+
+
+@login_required
+@require_POST
 def book_seats(request):
     show_id = request.POST.get("show_id")
     seats_json = request.POST.get("seats", "[]")
@@ -76,7 +166,7 @@ def book_seats(request):
         selected_seats = []
 
     if not selected_seats or not show_id:
-        return redirect("movie_list")
+        return redirect("movies:movie_list")
 
     show = get_object_or_404(Show, pk=show_id)
 
@@ -94,7 +184,7 @@ def book_seats(request):
             valid_seats.append(key)
 
     if not valid_seats:
-        return redirect("select_seats", show_id=show.pk)
+        return redirect("movies:select_seats", show_id=show.pk)
 
     total_price = len(valid_seats) * show.price
 
@@ -111,7 +201,10 @@ def book_seats(request):
             seat_number=seat_number,
         )
 
-    return redirect("booking_confirmation", booking_id=booking.pk)
+    # Trigger background email immediately after booking is fully created
+    send_booking_confirmation_email.delay(booking.pk)
+
+    return redirect("movies:booking_confirmation", booking_id=booking.pk)
 
 
 @login_required

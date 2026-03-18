@@ -1,0 +1,195 @@
+/* =====================================================
+   BookMySeat — Theme Variables & Dark Mode
+   ===================================================== */
+
+/* ── Light Mode (default) ── */
+:root {
+  --bms-bg:           #f0f2f5;
+  --bms-card-bg:      #ffffff;
+  --bms-surface:      #ffffff;
+  --bms-border:       rgba(0, 0, 0, 0.07);
+  --bms-text:         #1a1a2e;
+  --bms-text-muted:   #6c757d;
+  --bms-text-inv:     #ffffff;
+  --bms-input-bg:     #ffffff;
+  --bms-input-border: #dee2e6;
+  --bms-shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+  --bms-shadow-md:    0 4px 20px rgba(0,0,0,0.08);
+  --bms-shadow-lg:    0 8px 40px rgba(0,0,0,0.12);
+
+  /* Brand tokens (always the same) */
+  --bms-accent:        #e94560;
+  --bms-accent-hover:  #c73652;
+  --bms-accent-glow:   rgba(233, 69, 96, 0.25);
+  --bms-dark:          #1a1a2e;
+  --bms-darker:        #0a0a14;
+  --bms-gradient-1:    linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  --bms-gradient-accent: linear-gradient(135deg, #e23744, #e94560, #ff6b6b);
+  --bms-border-radius: 16px;
+  --bms-shadow-glow:   0 4px 25px var(--bms-accent-glow);
+}
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+  --bms-bg:           #0f0f1a;
+  --bms-card-bg:      #1a1a2e;
+  --bms-surface:      #16213e;
+  --bms-border:       rgba(255, 255, 255, 0.07);
+  --bms-text:         #e8eaf0;
+  --bms-text-muted:   #9aa3b0;
+  --bms-input-bg:     #16213e;
+  --bms-input-border: rgba(255,255,255,0.12);
+  --bms-shadow-sm:    0 2px 8px rgba(0,0,0,0.3);
+  --bms-shadow-md:    0 4px 20px rgba(0,0,0,0.4);
+  --bms-shadow-lg:    0 8px 40px rgba(0,0,0,0.5);
+}
+
+/* ── Global transitions for smooth theme switch ── */
+body,
+.card,
+.navbar,
+.footer,
+.form-control,
+.filter-bar,
+.alert,
+.badge,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* ── Dark mode body ── */
+[data-theme="dark"] body {
+  background-color: var(--bms-bg);
+  color: var(--bms-text);
+}
+
+/* ── Dark mode cards ── */
+[data-theme="dark"] .card {
+  background: var(--bms-card-bg);
+  border-color: var(--bms-border);
+  color: var(--bms-text);
+}
+
+[data-theme="dark"] .card-header,
+[data-theme="dark"] .card-footer {
+  background-color: var(--bms-surface);
+  border-color: var(--bms-border);
+}
+
+/* ── Dark mode forms ── */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--bms-input-bg);
+  border-color: var(--bms-input-border);
+  color: var(--bms-text);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus {
+  background-color: var(--bms-input-bg);
+  color: var(--bms-text);
+  border-color: var(--bms-accent);
+}
+
+[data-theme="dark"] .input-group-text {
+  background-color: var(--bms-surface);
+  border-color: var(--bms-input-border);
+  color: var(--bms-text-muted);
+}
+
+/* ── Dark mode text helpers ── */
+[data-theme="dark"] .text-muted {
+  color: var(--bms-text-muted) !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: var(--bms-text) !important;
+}
+
+/* ── Dark mode filter bar ── */
+[data-theme="dark"] .filter-bar {
+  background: var(--bms-card-bg);
+  border-color: var(--bms-border);
+}
+
+/* ── Dark mode footer ── */
+[data-theme="dark"] .footer {
+  background: var(--bms-darker) !important;
+}
+
+/* ── Dark mode pagination ── */
+[data-theme="dark"] .page-link {
+  background-color: var(--bms-card-bg);
+  border-color: var(--bms-border);
+  color: var(--bms-text);
+}
+[data-theme="dark"] .page-item.active .page-link {
+  background-color: var(--bms-accent);
+  border-color: var(--bms-accent);
+}
+
+/* ── Dark mode alerts ── */
+[data-theme="dark"] .alert-danger {
+  background-color: rgba(233,69,96,0.15);
+  border-color: rgba(233,69,96,0.3);
+  color: #ff8fa3;
+}
+
+/* ── Dark mode section header ── */
+[data-theme="dark"] .page-header {
+  background: var(--bms-gradient-1);
+}
+
+/* ── Theme toggle button ── */
+#themeToggle {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  padding: 6px 14px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+#themeToggle:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* ── Email validation inline error ── */
+.field-error {
+  color: #e94560;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-error.visible {
+  display: flex;
+}
+
+input.is-invalid-custom {
+  border-color: #e94560 !important;
+  box-shadow: 0 0 0 3px rgba(233,69,96,0.15) !important;
+}
+
+input.is-valid-custom {
+  border-color: #28a745 !important;
+  box-shadow: 0 0 0 3px rgba(40,167,69,0.1) !important;
+}

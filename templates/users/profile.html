@@ -1,91 +1,334 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
-{% block title %}Profile — BookMySeat{% endblock %}
+{% block title %}Account Settings — BookMySeat{% endblock %}
 
 {% block content %}
-<div class="row mt-4">
-  <!-- Profile Card -->
-  <div class="col-md-5 mb-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--bms-dark), var(--bms-accent)); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #fff; font-weight: 700">
+<div class="container py-4">
+  <div class="row mb-4 fade-in-up">
+    <div class="col-12">
+      <h2 class="section-title mb-1"><i class="fas fa-user-circle accent me-2"></i>Account Settings</h2>
+      <p class="text-muted">Manage your profile, preferences, and booking history</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- ── Profile & Settings Card ── -->
+    <div class="col-lg-5 fade-in-up"  style="animation-delay: 0.1s;">
+
+      <!-- Profile Header -->
+      <div class="profile-header-card mb-4">
+        <div class="profile-avatar-lg">
           {{ user.username|first|upper }}
         </div>
-        <h4 class="font-weight-bold">{{ user.username }}</h4>
-        <p class="text-muted">{{ user.email }}</p>
-        <hr>
-        <form method="POST">
-          {% csrf_token %}
-          {% for field in u_form %}
-          <div class="form-group text-left">
-            <label class="font-weight-bold">{{ field.label }}</label>
-            {{ field }}
-            {% for error in field.errors %}
-            <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
-          </div>
-          {% endfor %}
-          <button type="submit" class="btn btn-bms btn-block">
-            <i class="fas fa-save mr-1"></i> Update Profile
-          </button>
-        </form>
-        <a href="{% url 'reset-password' %}" class="btn btn-outline-secondary btn-block mt-2">
-          <i class="fas fa-key mr-1"></i> Change Password
-        </a>
+        <h4 class="profile-name">{{ user.username }}</h4>
+        <p class="profile-email">{{ user.email }}</p>
+        
+        {% if user.is_staff %}
+        <div class="mt-3">
+          <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-3 py-2 rounded-pill">
+            <i class="fas fa-shield-alt me-1"></i> Admin Account
+          </span>
+        </div>
+        {% endif %}
       </div>
-    </div>
-  </div>
 
-  <!-- Recent Bookings -->
-  <div class="col-md-7">
-    <h4 class="font-weight-bold mb-3"><i class="fas fa-ticket-alt mr-2" style="color: var(--bms-accent)"></i> Recent Bookings</h4>
-    {% if bookings %}
-    {% for booking in bookings %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="font-weight-bold mb-1">{{ booking.show.movie.title }}</h6>
-            <p class="text-muted small mb-1">
-              {{ booking.show.screen.theater.name }} &bull; {{ booking.show.screen.name }}
-            </p>
-            <p class="small mb-1">
-              <i class="fas fa-calendar mr-1"></i> {{ booking.show.show_date|date:"d M Y" }}
-              <i class="fas fa-clock ml-2 mr-1"></i> {{ booking.show.show_time|time:"h:i A" }}
-            </p>
-            <p class="small mb-0">
-              <strong>Seats:</strong>
-              {% for seat in booking.seats.all %}
-              <span class="badge badge-secondary">{{ seat.row_letter }}{{ seat.seat_number }}</span>
+      <!-- Update Profile Form -->
+      <div class="settings-card mb-4">
+        <h5 class="settings-title"><i class="fas fa-user-edit me-2 accent"></i>Personal Information</h5>
+        <div class="settings-body">
+          <form id="profileForm" method="POST" novalidate>
+            {% csrf_token %}
+            
+            {% for field in u_form %}
+            <div class="mb-4">
+              <label class="form-label text-uppercase text-muted fw-bold" style="font-size:0.75rem; letter-spacing:1px;">
+                {{ field.label }}
+              </label>
+              
+              {% if field.name == 'email' %}
+              <div class="input-group-custom">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="profileEmail"
+                  name="email"
+                  class="pay-input has-icon w-100"
+                  value="{{ field.value|default:'' }}"
+                  placeholder="your@email.com"
+                  required
+                >
+              </div>
+              <div class="text-danger small mt-2 d-none" id="profileEmailError">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                <span id="profileEmailErrorText">Please enter a valid email address.</span>
+              </div>
+              
+              {% else %}
+              <!-- General Fields (like username) -->
+              <div class="input-group-custom">
+                <i class="fas fa-user"></i>
+                <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}" class="pay-input has-icon w-100" value="{{ field.value|default:'' }}">
+              </div>
+              {% endif %}
+              
+              {% for error in field.errors %}
+              <div class="text-danger small mt-2"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
               {% endfor %}
-            </p>
+            </div>
+            {% endfor %}
+            
+            <div class="d-flex flex-column gap-3 mt-4">
+              <button type="submit" id="profileSubmitBtn" class="btn-bms w-100 btn-lg shadow-glow">
+                Save Changes
+              </button>
+              <a href="{% url 'reset-password' %}" class="btn-ghost w-100 justify-content-center">
+                <i class="fas fa-key me-2"></i> Update Password
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── App Appearance & Recent Bookings ── -->
+    <div class="col-lg-7 fade-in-up" style="animation-delay: 0.2s;">
+      
+      <!-- Appearance Toggle -->
+      <div class="settings-card mb-4">
+        <div class="settings-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h5 class="settings-title mb-1 m-0"><i class="fas fa-palette me-2 accent"></i>App Appearance</h5>
+            <p class="text-muted small mb-0 mt-1">Customize your viewing experience</p>
           </div>
-          <div class="text-right">
-            <span class="badge {% if booking.status == 'confirmed' %}badge-success{% else %}badge-danger{% endif %} p-2">
-              {{ booking.get_status_display }}
-            </span>
-            <div class="font-weight-bold mt-2" style="color: var(--bms-accent)">₹{{ booking.total_price }}</div>
+          
+          <div class="theme-switch-wrapper">
+            <span class="theme-label me-2" id="syncThemeLabel">Dark</span>
+            <label class="theme-switch" for="syncThemeToggle">
+              <input type="checkbox" id="syncThemeToggle" checked>
+              <div class="slider round"></div>
+            </label>
           </div>
         </div>
       </div>
-    </div>
-    {% endfor %}
-    <a href="{% url 'movies:booking_history' %}" class="btn btn-outline-dark btn-sm">View All Bookings</a>
-    {% else %}
-    <div class="card">
-      <div class="card-body text-center py-4">
-        <i class="fas fa-ticket-alt fa-2x text-muted mb-2"></i>
-        <p class="text-muted mb-0">No bookings yet. <a href="{% url 'movies:movie_list' %}">Browse movies</a> to get started!</p>
+
+      <!-- Recent Bookings Mini List -->
+      <div class="settings-card">
+        <div class="settings-body p-0">
+          <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary border-opacity-25">
+            <h5 class="settings-title m-0"><i class="fas fa-history me-2 accent"></i>Recent Bookings</h5>
+            <a href="{% url 'movies:booking_history' %}" class="btn-ghost btn-sm px-3 py-2">View All</a>
+          </div>
+          
+          <div class="recent-bookings-list">
+            {% if bookings %}
+              {% for booking in bookings|slice:":3" %}
+              <div class="mini-booking-item flex-column flex-sm-row">
+                <div class="flex-grow-1 mb-2 mb-sm-0">
+                  <h6 class="fw-bold text-white mb-1">{{ booking.show.movie.title }}</h6>
+                  <div class="text-muted small">
+                    <i class="far fa-calendar-alt me-1"></i> {{ booking.show.show_date|date:"d M" }} • 
+                    {{ booking.show.screen.theater.name }}
+                  </div>
+                </div>
+                
+                <div class="text-start text-sm-end">
+                  {% if booking.status == 'confirmed' %}
+                  <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 mb-1">Confirmed</span>
+                  {% else %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 mb-1">{{ booking.status|title }}</span>
+                  {% endif %}
+                  <div class="fw-bold" style="color:var(--bms-text)">₹{{ booking.total_price }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-center p-5 text-muted">
+                <i class="fas fa-ticket-alt fs-2 mb-3 opacity-50"></i>
+                <p class="mb-0">You haven't booked any movies yet.</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
+
     </div>
-    {% endif %}
   </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ── Cards ── */
+.profile-header-card {
+  background: linear-gradient(to bottom, var(--bms-input-bg), var(--bms-card-bg));
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: var(--bms-shadow-md);
+}
+.profile-avatar-lg {
+  width: 90px; height: 90px;
+  background: var(--bms-gradient-accent);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; color: #fff; font-weight: 800;
+  box-shadow: 0 10px 25px rgba(229, 9, 20, 0.4);
+  border: 4px solid var(--bms-card-bg);
+}
+.profile-name { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.profile-email { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+.settings-card {
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--bms-shadow-md);
+  overflow: hidden;
+}
+.settings-title { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 24px; display: flex; align-items: center; }
+.settings-body { padding: 32px; }
+
+/* ── Form Inputs ── */
+.input-group-custom { position: relative; display: flex; align-items: center; }
+.input-group-custom i { position: absolute; left: 16px; color: var(--text-muted); z-index: 2; pointer-events: none; }
+.pay-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: 12px;
+  color: var(--bms-text); font-size: 1rem;
+  transition: all 0.3s;
+}
+.pay-input.has-icon { padding-left: 44px; }
+.pay-input:focus { border-color: var(--bms-accent); outline: none; box-shadow: 0 0 0 3px var(--bms-accent-glow); background: #333; }
+.pay-input.is-invalid { border-color: #ff4040; box-shadow: 0 0 0 3px rgba(255, 64, 64, 0.2); }
+
+/* ── Recent Bookings List ── */
+.mini-booking-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s;
+}
+.mini-booking-item:last-child { border-bottom: none; }
+.mini-booking-item:hover { background: rgba(255,255,255,0.02); }
+
+/* ── Custom Switch ── */
+.theme-switch-wrapper {
+  display: flex; align-items: center;
+}
+.theme-label { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+.theme-switch {
+  position: relative; display: inline-block; width: 60px; height: 34px;
+}
+.theme-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background-color: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  transition: .4s;
+}
+.slider:before {
+  position: absolute; content: "\f186"; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+  height: 26px; width: 26px; left: 3px; bottom: 3px;
+  background-color: var(--text-muted);
+  color: var(--bms-card-bg);
+  display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+  transition: .4s;
+}
+input:checked + .slider { background-color: var(--bms-accent); border-color: var(--bms-accent); }
+input:checked + .slider:before { 
+  transform: translateX(26px); background-color: #fff; color: var(--bms-accent); content: "\f185";
+}
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+
+@media (max-width: 576px) {
+  .settings-body { padding: 24px 20px; }
+  .mini-booking-item { padding: 16px 20px; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('form input[type="text"], form input[type="email"]');
-    inputs.forEach(input => input.classList.add('form-control'));
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  // ── Profile Email Validation ── //
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const profileEmail = document.getElementById('profileEmail');
+  const errorMsg = document.getElementById('profileEmailError');
+  const errorText = document.getElementById('profileEmailErrorText');
+  const form = document.getElementById('profileForm');
+
+  if(profileEmail && form) {
+    function validateEmail() {
+      const val = profileEmail.value.trim();
+      if(!val) {
+        profileEmail.classList.add('is-invalid');
+        errorMsg.classList.remove('d-none');
+        errorText.textContent = 'Email is required.';
+        return false;
+      }
+      if(!EMAIL_REGEX.test(val)) {
+        profileEmail.classList.add('is-invalid');
+        errorMsg.classList.remove('d-none');
+        errorText.textContent = 'Enter a valid email address.';
+        return false;
+      }
+      profileEmail.classList.remove('is-invalid');
+      errorMsg.classList.add('d-none');
+      return true;
+    }
+
+    profileEmail.addEventListener('blur', validateEmail);
+    form.addEventListener('submit', (e) => {
+      if(!validateEmail()) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  // ── Theme Sync Logic ── //
+  // Syncs the profile page toggle with the navbar generic toggle
+  const profileToggle = document.getElementById('syncThemeToggle');
+  const profileLabel = document.getElementById('syncThemeLabel');
+  const root = document.getElementById('htmlRoot');
+  
+  // Read current globally applied theme
+  const currentTheme = root.getAttribute('data-theme') || 'dark';
+  const isDark = currentTheme === 'dark';
+  
+  if(profileToggle) {
+    profileToggle.checked = isDark;
+    profileLabel.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    
+    profileToggle.addEventListener('change', function() {
+      const wantDark = this.checked;
+      const targetTheme = wantDark ? 'dark' : 'light';
+      
+      // Update global DOM & Storage
+      root.setAttribute('data-theme', targetTheme);
+      localStorage.setItem('bms-theme', targetTheme);
+      
+      // Update local profile UI
+      profileLabel.textContent = wantDark ? 'Dark Mode' : 'Light Mode';
+      
+      // Sync navbar icon (defined in basic.html)
+      const navIcon = document.getElementById('themeIcon');
+      if(navIcon) {
+        navIcon.className = wantDark ? 'fas fa-sun' : 'fas fa-moon';
+      }
+      
+      // Handle the alert dismiss button colors
+      document.querySelectorAll('.btn-close').forEach(btn => {
+        btn.style.filter = wantDark ? 'invert(1)' : 'none';
+      });
+    });
+  }
+});
 </script>
 {% endblock %}

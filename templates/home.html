@@ -1,146 +1,508 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
-{% block title %}BookMySeat — Book Movie Tickets Online{% endblock %}
-
-{% block extra_css %}
-.hero-section {
-  background: linear-gradient(135deg, var(--bms-dark) 0%, #1a1a2e 40%, var(--bms-accent) 100%);
-  color: #fff;
-  padding: 80px 0 70px;
-  margin: -24px -15px 40px -15px;
-  text-align: center;
-  border-radius: 0 0 30px 30px;
-  position: relative;
-  overflow: hidden;
-}
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 70% 30%, rgba(233,69,96,0.15) 0%, transparent 50%);
-  animation: heroPulse 6s ease-in-out infinite;
-}
-@keyframes heroPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-.hero-section h1 {
-  font-size: 3rem;
-  font-weight: 900;
-  margin-bottom: 12px;
-  letter-spacing: -1px;
-  position: relative;
-}
-.hero-section p {
-  font-size: 1.2rem;
-  opacity: 0.8;
-  font-weight: 300;
-  max-width: 500px;
-  margin: 0 auto;
-  position: relative;
-}
-.hero-section .btn {
-  position: relative;
-}
-.movie-card {
-  position: relative;
-}
-.movie-card .card-img-top {
-  height: 320px;
-  object-fit: cover;
-}
-.movie-card .card-body {
-  padding: 18px;
-}
-.movie-card .card-title {
-  font-weight: 700;
-  font-size: 1.05rem;
-  margin-bottom: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.movie-card .rating-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(10px);
-  color: #fbbf24;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-.movie-poster-placeholder {
-  height: 320px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.5);
-  font-size: 3.5rem;
-}
-{% endblock %}
+{% block title %}BookMySeat — Premium Cinemas{% endblock %}
 
 {% block content %}
-<div class="hero-section">
-  <h1><i class="fas fa-film mr-2"></i> BookMySeat</h1>
-  <p>Your one-stop destination for booking movie tickets online. Experience cinema like never before.</p>
-  <a href="{% url 'movies:movie_list' %}" class="btn btn-bms btn-lg mt-4" style="padding: 14px 36px; font-size: 1.05rem">
-    <i class="fas fa-search mr-2"></i> Browse All Movies
-  </a>
-</div>
 
-<h2 class="section-title"><i class="fas fa-fire mr-2" style="color: var(--bms-accent)"></i> Now Showing</h2>
-
-{% if movies %}
-<div class="row">
-  {% for movie in movies %}
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4" style="animation: fadeInUp 0.5s ease forwards; animation-delay: {{ forloop.counter0 }}00ms; opacity: 0">
-    <div class="card movie-card h-100">
-      {% if movie.poster %}
-      <div style="overflow: hidden">
-        <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
-      </div>
-      {% else %}
-      <div class="movie-poster-placeholder">
-        <i class="fas fa-film"></i>
-      </div>
-      {% endif %}
-      <span class="rating-badge"><i class="fas fa-star mr-1"></i> {{ movie.rating }}</span>
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title" title="{{ movie.title }}">{{ movie.title }}</h5>
-        <div class="mb-2">
-          <span class="badge-genre">{{ movie.get_genre_display }}</span>
-          <span class="badge-genre ml-1">{{ movie.get_language_display }}</span>
+<!-- ── Cinematic Hero ── -->
+<section class="hero-cinematic">
+  <!-- Dynamic Background (could be replaced by featured movie backdrop) -->
+  <div class="hero-img-bg" style="background-image: url('https://image.tmdb.org/t/p/original/8Y43POKjjKDGI9MH89NW0NAzzp8.jpg');"></div>
+  <div class="hero-fade-bottom"></div>
+  <div class="hero-fade-right"></div>
+  
+  <div class="container hero-content">
+    <div class="row align-items-center min-vh-75">
+      <div class="col-lg-7">
+        <div class="fade-in-up" style="animation-delay: 0.1s;">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span> Now In Cinemas
+          </div>
+          <h1 class="hero-title">
+            Experience<br>
+            Cinema Like<br>
+            <span class="text-gradient">Never Before.</span>
+          </h1>
+          <p class="hero-desc">
+            Discover the latest blockbusters, explore independent gems, and book your tickets in prime locations instantly.
+          </p>
+          
+          <div class="hero-actions">
+            <a href="{% url 'movies:movie_list' %}" class="btn-bms btn-play">
+              <i class="fas fa-ticket-alt"></i> Browse Movies
+            </a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn-ghost">
+              <i class="fas fa-user-plus"></i> Join Free
+            </a>
+            {% endif %}
+          </div>
+          
+          <div class="hero-meta mt-5">
+            <div class="meta-item">
+              <span class="meta-val">500+</span>
+              <span class="meta-lbl">Movies</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+              <span class="meta-val">50+</span>
+              <span class="meta-lbl">Cinemas</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+              <span class="meta-val"><i class="fas fa-star text-warning"></i> 4.9</span>
+              <span class="meta-lbl">User Rating</span>
+            </div>
+          </div>
         </div>
-        <div class="mb-3 text-muted" style="font-size: 0.85rem">
-          <i class="fas fa-clock mr-1"></i> {{ movie.duration_minutes }} min
-        </div>
-        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn btn-bms btn-sm mt-auto">
-          <i class="fas fa-ticket-alt mr-1"></i> Book Now
-        </a>
       </div>
     </div>
   </div>
-  {% endfor %}
-</div>
+</section>
 
-<div class="text-center mt-3 mb-5">
-  <a href="{% url 'movies:movie_list' %}" class="btn btn-outline-dark btn-lg" style="padding: 12px 36px">
-    View All Movies <i class="fas fa-arrow-right ml-2"></i>
-  </a>
-</div>
+<!-- ── Trending / Now Showing Row ── -->
+<section class="section-padding offset-up">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4 pr-3">
+      <h2 class="section-title mb-0">
+        <i class="fas fa-fire me-2"></i> Trending Now
+      </h2>
+      <a href="{% url 'movies:movie_list' %}" class="see-all-link">See all <i class="fas fa-chevron-right ms-1"></i></a>
+    </div>
 
-{% else %}
-<div class="text-center py-5">
-  <i class="fas fa-film fa-3x text-muted mb-3"></i>
-  <h4 class="text-muted">No movies available yet</h4>
-  <p class="text-muted">Check back soon for the latest movies!</p>
-</div>
-{% endif %}
+    {% if movies %}
+    <div class="movie-row-container">
+      <button class="row-nav left"><i class="fas fa-chevron-left"></i></button>
+      
+      <div class="movie-row" id="trendingRow">
+        {% for movie in movies %}
+        <a href="{% url 'movies:movie_detail' movie.id %}" class="movie-card-streaming">
+          <div class="poster-box">
+            {% if movie.poster %}
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" loading="lazy">
+            {% else %}
+            <div class="poster-placeholder"><i class="fas fa-film"></i></div>
+            {% endif %}
+            
+            <div class="poster-overlay">
+              <div class="play-btn-circle"><i class="fas fa-play"></i></div>
+            </div>
+            <div class="rating-badge"><i class="fas fa-star text-warning me-1"></i>{{ movie.rating }}</div>
+          </div>
+          
+          <div class="movie-info">
+            <h5 class="movie-title" title="{{ movie.title }}">{{ movie.title }}</h5>
+            <div class="movie-tags">
+              <span class="quality-badge">HD</span>
+              <span class="age-badge">13+</span>
+              <span>{{ movie.duration_minutes }}m</span>
+            </div>
+            <div class="movie-genres text-truncate">{{ movie.get_genre_display }} • {{ movie.get_language_display }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      
+      <button class="row-nav right"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon"><i class="fas fa-film"></i></div>
+      <h4>No movies trending right now</h4>
+      <p>Check back later for new releases.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── Why Book With Us (Features) ── -->
+<section class="features-section section-padding">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-couch"></i></div>
+          <h5>Premium Seating</h5>
+          <p>Choose exact seats with our interactive map. Recliners available in select cinemas.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+          <h5>Instant Booking</h5>
+          <p>Skip the queue with instant digital tickets and QR code entry directly from your phone.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-tag"></i></div>
+          <h5>Exclusive Offers</h5>
+          <p>Get access to early bird specials, combo discounts, and members-only preview screenings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Reset Container for Full Hero width ── */
+.main-content > .container {
+  max-width: 100%;
+  padding: 0;
+}
+.main-content {
+  padding-top: 0 !important; /* Override offset for hero */
+}
+section .container {
+  padding-left: 4%;
+  padding-right: 4%;
+  max-width: 1600px;
+}
+
+/* ── Hero Cinematic ── */
+.hero-cinematic {
+  position: relative;
+  height: 95vh;
+  min-height: 700px;
+  max-height: 1000px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin-top: -80px; /* pull up under transparent navbar */
+}
+.hero-img-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+  filter: saturate(1.2);
+  transform: scale(1.05); /* Slight scale to hide edges during pan */
+  animation: slowPan 30s infinite alternate ease-in-out;
+}
+@keyframes slowPan {
+  0% { transform: scale(1.05) translate(0, 0); }
+  100% { transform: scale(1.1) translate(-2%, 1%); }
+}
+
+/* Gradients for text readability */
+.hero-fade-bottom {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, var(--bms-dark) 0%, rgba(20,20,20,0.8) 20%, rgba(20,20,20,0) 60%);
+}
+.hero-fade-right {
+  position: absolute;
+  top: 0; left: 0; right: 30%; bottom: 0;
+  background: linear-gradient(to right, var(--bms-dark) 0%, rgba(20,20,20,0.8) 40%, rgba(20,20,20,0) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  padding-top: 80px;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  padding: 6px 16px;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  background: var(--bms-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--bms-accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  margin-bottom: 24px;
+}
+.text-gradient {
+  background: var(--bms-gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+.hero-desc {
+  font-size: 1.25rem;
+  color: rgba(255,255,255,0.85);
+  max-width: 550px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-play {
+  font-size: 1.1rem;
+  padding: 14px 36px;
+  border-radius: 8px;
+  gap: 12px;
+}
+.btn-play i { font-size: 1.2rem; }
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.meta-item { display: flex; flex-direction: column; }
+.meta-val { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; line-height: 1; }
+.meta-lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 6px; }
+.meta-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.2); }
+
+/* ── Streaming Movie Row ── */
+.offset-up {
+  position: relative;
+  z-index: 20;
+  margin-top: -120px;
+  padding-bottom: 80px;
+  background: linear-gradient(to bottom, transparent, var(--bms-dark) 20%);
+}
+.see-all-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+.see-all-link:hover { color: #fff; }
+
+.movie-row-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.movie-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 20px 0;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+}
+.movie-row::-webkit-scrollbar { display: none; } /* Chrome */
+
+.row-nav {
+  position: absolute;
+  z-index: 30;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.row-nav:hover { background: var(--bms-accent); border-color: var(--bms-accent); transform: scale(1.1); }
+.row-nav.left { left: -24px; }
+.row-nav.right { right: -24px; }
+
+/* Desktop streaming card */
+.movie-card-streaming {
+  flex: 0 0 220px;
+  display: block;
+  text-decoration: none;
+  border-radius: var(--bms-border-radius);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  transform-origin: center bottom;
+}
+.movie-card-streaming:hover {
+  transform: scale(1.08) translateY(-10px);
+  z-index: 100;
+}
+.poster-box {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: var(--bms-border-radius);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--bms-shadow-sm);
+  transition: box-shadow 0.4s;
+}
+.movie-card-streaming:hover .poster-box {
+  box-shadow: var(--bms-shadow-lg);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.poster-box img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.movie-card-streaming:hover .poster-box img {
+  transform: scale(1.05); /* very subtle zoom */
+}
+
+/* Streaming Hover Overlay */
+.poster-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.movie-card-streaming:hover .poster-overlay { opacity: 1; }
+.play-btn-circle {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem;
+  transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.movie-card-streaming:hover .play-btn-circle { transform: scale(1); }
+.rating-badge {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px; border-radius: 6px;
+  font-weight: 700; font-size: 0.8rem; color: #fff;
+}
+
+/* Info box pops out on hover */
+.movie-info {
+  background: var(--bms-card-bg);
+  padding: 16px;
+  border-bottom-left-radius: var(--bms-border-radius);
+  border-bottom-right-radius: var(--bms-border-radius);
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  opacity: 0; visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-top: none;
+}
+.movie-card-streaming:hover .movie-info {
+  opacity: 1; visibility: visible;
+  transform: translateY(0);
+}
+.movie-title {
+  color: #fff; font-family: var(--font-heading);
+  font-size: 1.05rem; font-weight: 700;
+  margin: 0 0 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.movie-tags {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 6px;
+}
+.quality-badge { border: 1px solid rgba(255,255,255,0.4); padding: 1px 4px; border-radius: 4px; }
+.age-badge { border: 1px solid rgba(255,255,255,0.4); padding: 1px 4px; border-radius: 4px; }
+.movie-genres { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── Features Section ── */
+.features-section {
+  background: var(--bms-darker);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 40px;
+}
+.feature-card {
+  text-align: center;
+  padding: 40px 20px;
+  transition: transform 0.3s;
+}
+.feature-card:hover { transform: translateY(-10px); }
+.feature-icon {
+  width: 70px; height: 70px;
+  background: rgba(229, 9, 20, 0.1);
+  color: var(--bms-accent);
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+}
+.feature-card h5 { font-family: var(--font-heading); color: #fff; font-weight: 700; margin-bottom: 12px; }
+.feature-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0; }
+
+@media (max-width: 991px) {
+  .hero-fade-right { right: 0; background: linear-gradient(to right, var(--bms-dark) 0%, rgba(20,20,20,0.8) 70%, rgba(20,20,20,0) 100%); }
+  .hero-title { font-size: 3.5rem; }
+  .offset-up { margin-top: -60px; }
+  .movie-card-streaming { flex: 0 0 180px; }
+  .movie-card-streaming:hover { transform: scale(1.05) translateY(-5px); }
+}
+@media (max-width: 576px) {
+  .hero-title { font-size: 2.8rem; }
+  .hero-desc { font-size: 1.05rem; }
+  .hero-meta { flex-wrap: wrap; gap: 16px; }
+  .movie-card-streaming { flex: 0 0 140px; }
+  .row-nav { display: none; } /* rely on natural swipe/scroll */
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Simple horizontal scroll for desktop arrows
+  document.addEventListener('DOMContentLoaded', () => {
+    const row = document.getElementById('trendingRow');
+    const leftBtn = document.querySelector('.row-nav.left');
+    const rightBtn = document.querySelector('.row-nav.right');
+    
+    if(row && leftBtn && rightBtn) {
+      leftBtn.addEventListener('click', () => {
+        row.scrollBy({ left: -600, behavior: 'smooth' });
+      });
+      rightBtn.addEventListener('click', () => {
+        row.scrollBy({ left: 600, behavior: 'smooth' });
+      });
+      
+      // Hide arrows if scroll not needed
+      const checkScroll = () => {
+        leftBtn.style.opacity = row.scrollLeft > 0 ? '1' : '0';
+        leftBtn.style.pointerEvents = row.scrollLeft > 0 ? 'auto' : 'none';
+        
+        const maxScroll = row.scrollWidth - row.clientWidth;
+        rightBtn.style.opacity = row.scrollLeft >= maxScroll - 5 ? '0' : '1';
+        rightBtn.style.pointerEvents = row.scrollLeft >= maxScroll - 5 ? 'none' : 'auto';
+      };
+      
+      row.addEventListener('scroll', checkScroll);
+      window.addEventListener('resize', checkScroll);
+      // Run once
+      setTimeout(checkScroll, 100);
+    }
+    
+    // Clean up body messages if appended outside main logic
+    const msgs = document.querySelector('.main-content > .container > .mt-4');
+    if(msgs) msgs.style.paddingLeft = '4%'; // align messages with main grid
+  });
+</script>
 {% endblock %}

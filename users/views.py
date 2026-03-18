@@ -18,19 +18,15 @@ def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-
-            # Optional superuser toggle from form
+            user = form.save()
+            # If superuser toggle is on
             if request.POST.get("is_superuser") == "on":
                 user.is_staff = True
                 user.is_superuser = True
+                user.save()
 
-            user.save()
-
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password1")
-            user = authenticate(username=username, password=password)
-            login(request, user)
+            # Log the user in with the correct backend specified
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect("profile")
     else:
         form = UserRegisterForm()

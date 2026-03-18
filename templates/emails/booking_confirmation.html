@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed — BookMySeat</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #f0f2f5;
+      padding: 32px 16px;
+      color: #1a1a2e;
+    }
+    .wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+      padding: 40px 32px 32px;
+      text-align: center;
+    }
+    .brand {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+    }
+    .check-icon {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, #e23744, #e94560);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+    }
+    .check-icon svg { width: 32px; height: 32px; }
+    .header h1 {
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .header p {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+    }
+
+    /* ── Content ── */
+    .content { padding: 36px 32px; }
+    .greeting {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .intro {
+      color: #6c757d;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* ── Ticket Card ── */
+    .ticket {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    .ticket-top {
+      padding: 24px 28px;
+    }
+    .movie-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .genre-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+    }
+    .ticket-divider {
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+    .ticket-divider::before,
+    .ticket-divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px dashed rgba(255,255,255,0.15);
+    }
+    .ticket-hole {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f0f2f5;
+      margin: 0 -8px;
+      flex-shrink: 0;
+    }
+    .ticket-bottom {
+      padding: 20px 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .ticket-field label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .ticket-field .val {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e8eaf0;
+      line-height: 1.4;
+    }
+    .ticket-field .val.highlight {
+      color: #e94560;
+      font-size: 16px;
+    }
+
+    /* ── Booking ID Box ── */
+    .booking-id-box {
+      background: #f8f9fa;
+      border: 1px dashed #dee2e6;
+      border-radius: 12px;
+      padding: 18px 24px;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .booking-id-box .label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #6c757d;
+      margin-bottom: 6px;
+    }
+    .booking-id-box .id-val {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #e94560;
+      letter-spacing: 2px;
+    }
+
+    /* ── Price Row ── */
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      background: rgba(233,69,96,0.06);
+      border-radius: 12px;
+      border: 1px solid rgba(233,69,96,0.15);
+      margin-bottom: 28px;
+    }
+    .price-row .price-label {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+    .price-row .price-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #e94560;
+    }
+
+    /* ── Notice ── */
+    .notice {
+      text-align: center;
+      color: #6c757d;
+      font-size: 13px;
+      line-height: 1.7;
+      padding-bottom: 8px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #1a1a2e;
+      padding: 24px 32px;
+      text-align: center;
+    }
+    .footer p {
+      color: rgba(255,255,255,0.4);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .footer .brand-footer {
+      color: #e94560;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">BookMySeat</div>
+      <div class="check-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h1>Booking Confirmed!</h1>
+      <p>Your seats are reserved. Get ready for the show! 🍿</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Hi {{ user_name }}!</p>
+      <p class="intro">
+        Great news — your booking has been confirmed. Here are your ticket details. Please show this email (or your booking ID) at the cinema entrance.
+      </p>
+
+      <!-- Ticket Card -->
+      <div class="ticket">
+        <div class="ticket-top">
+          <div class="movie-title">{{ movie_name }}</div>
+          <div class="genre-badge">🎬 Cinema Ticket</div>
+        </div>
+
+        <div class="ticket-divider">
+          <div class="ticket-hole"></div>
+          <div class="ticket-hole"></div>
+        </div>
+
+        <div class="ticket-bottom">
+          <div class="ticket-field">
+            <label>Theater</label>
+            <div class="val">{{ theater }}</div>
+          </div>
+          <div class="ticket-field">
+            <label>Show Time</label>
+            <div class="val">{{ show_time }}</div>
+          </div>
+          <div class="ticket-field">
+            <label>Seats</label>
+            <div class="val highlight">{{ seats }}</div>
+          </div>
+          <div class="ticket-field">
+            <label>Booking ID</label>
+            <div class="val" style="font-family:monospace;">#{{ booking_id }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Price -->
+      <div class="price-row">
+        <div class="price-label"><strong>Total Paid</strong></div>
+        <div class="price-val">₹{{ total_price }}</div>
+      </div>
+
+      <!-- Booking ID reference -->
+      <div class="booking-id-box">
+        <div class="label">Reference ID</div>
+        <div class="id-val">{{ payment_id }}</div>
+      </div>
+
+      <p class="notice">
+        Present this email or your Booking ID at the cinema entrance.<br>
+        Enjoy the movie! 🎉
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="brand-footer">BookMySeat</div>
+      <p>
+        &copy; 2026 BookMySeat. All rights reserved.<br>
+        This is an automated message — please do not reply to this email.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

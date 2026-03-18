@@ -1,170 +1,177 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
 {% block title %}Booking Confirmed — BookMySeat{% endblock %}
 
-{% block extra_css %}
-.confirmation-card {
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: var(--bms-shadow-lg);
-  overflow: hidden;
-  max-width: 580px;
-  margin: 0 auto;
-}
-.confirmation-header {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  padding: 40px 30px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.confirmation-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
-}
-.confirmation-header .check-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px;
-  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes popIn {
-  0% { transform: scale(0); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.confirmation-header .check-icon i {
-  font-size: 2rem;
-}
-.confirmation-header h2 {
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  position: relative;
-}
-.ticket-details {
-  padding: 30px;
-}
-.ticket-details .detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f5;
-}
-.ticket-details .detail-row:last-child {
-  border-bottom: none;
-}
-.detail-label {
-  color: var(--bms-text-muted);
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-.detail-value {
-  font-weight: 700;
-  color: var(--bms-text);
-  font-size: 0.95rem;
-}
-.booking-id-badge {
-  background: linear-gradient(135deg, #f8f9fa, #f0f2f5);
-  padding: 14px 24px;
-  border-radius: 12px;
-  text-align: center;
-  margin-bottom: 20px;
-  border: 1px solid #e9ecef;
-}
-.booking-id-badge .id-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--bms-text-muted);
-  font-weight: 600;
-}
-.booking-id-badge .id-value {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--bms-text);
-  letter-spacing: -0.5px;
-}
-.total-strip {
-  background: linear-gradient(135deg, #fef3f4, #fff5f5);
-  margin: 10px -30px;
-  padding: 20px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-{% endblock %}
-
 {% block content %}
-<div class="mt-5 mb-5" style="animation: fadeInUp 0.6s ease">
-  <div class="confirmation-card">
-    <div class="confirmation-header">
-      <div class="check-icon">
-        <i class="fas fa-check"></i>
-      </div>
-      <h2 class="mb-1">Booking Confirmed!</h2>
-      <p class="mb-0 mt-2" style="opacity: 0.85; font-weight: 300">Your tickets have been booked successfully</p>
+<div class="confirm-wrap">
+  <!-- Success Header -->
+  <div class="text-center mb-4">
+    <div class="check-ring mx-auto mb-3">
+      <i class="fas fa-check"></i>
     </div>
-    <div class="ticket-details">
-      <div class="booking-id-badge">
-        <div class="id-label">Booking ID</div>
-        <div class="id-value">#{{ booking.id }}</div>
+    <h2 class="fw-bold text-white mb-2" style="font-family: var(--font-heading);">Booking Successful!</h2>
+    <p class="text-muted">Your tickets have been confirmed and sent to your email.</p>
+  </div>
+
+  <!-- Cinematic Ticket -->
+  <div class="ticket-card">
+    <div class="ticket-art" style="{% if booking.show.movie.poster %}background-image: url('{{ booking.show.movie.poster.url }}');{% else %}background: linear-gradient(135deg, #1f0814, #141414);{% endif %}">
+      <div class="ticket-art-overlay"></div>
+      <div class="ticket-art-content">
+        <div class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 mb-2">Confirmed</div>
+        <h3 class="movie-name text-truncate" title="{{ booking.show.movie.title }}">{{ booking.show.movie.title }}</h3>
+        <p class="theater-name text-truncate"><i class="fas fa-building me-1"></i> {{ booking.show.screen.theater.name }}</p>
+      </div>
+    </div>
+
+    <div class="ticket-perforation">
+      <div class="ticket-dashes"></div>
+    </div>
+
+    <div class="ticket-body">
+      <div class="row g-4 mb-4">
+        <div class="col-6">
+          <div class="detail-label">Date</div>
+          <div class="detail-value">{{ booking.show.show_date|date:"D, d M" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="detail-label">Time</div>
+          <div class="detail-value">{{ booking.show.show_time|time:"h:i A" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="detail-label">Screen</div>
+          <div class="detail-value">{{ booking.show.screen.name }}</div>
+        </div>
+        <div class="col-6">
+          <div class="detail-label">Seats</div>
+          <div class="detail-value text-accent">
+            {% for seat in seats %}{{ seat.row_letter }}{{ seat.seat_number }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          </div>
+        </div>
       </div>
 
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-film mr-2"></i> Movie</span>
-        <span class="detail-value">{{ booking.show.movie.title }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-building mr-2"></i> Theater</span>
-        <span class="detail-value">{{ booking.show.screen.theater.name }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-tv mr-2"></i> Screen</span>
-        <span class="detail-value">{{ booking.show.screen.name }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-calendar mr-2"></i> Date</span>
-        <span class="detail-value">{{ booking.show.show_date|date:"d M Y" }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-clock mr-2"></i> Time</span>
-        <span class="detail-value">{{ booking.show.show_time|time:"h:i A" }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-chair mr-2"></i> Seats</span>
-        <span class="detail-value" style="color: var(--bms-accent)">
-          {% for seat in seats %}{{ seat.row_letter }}{{ seat.seat_number }}{% if not forloop.last %}, {% endif %}{% endfor %}
-        </span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label"><i class="fas fa-hashtag mr-2"></i> Tickets</span>
-        <span class="detail-value">{{ seats|length }}</span>
-      </div>
-      <div class="total-strip">
-        <span style="font-weight: 700; font-size: 1.05rem"><i class="fas fa-rupee-sign mr-2"></i> Total Paid</span>
-        <span style="font-weight: 900; font-size: 1.5rem; color: var(--bms-accent); letter-spacing: -0.5px">₹{{ booking.total_price }}</span>
+      <div class="barcode-area">
+        <i class="fas fa-qrcode qr-placeholder"></i>
+        <div class="booking-id">Booking ID: <span class="text-white">{{ booking.id }}</span></div>
       </div>
     </div>
   </div>
 
-  <div class="text-center mt-4">
-    <a href="{% url 'movies:booking_history' %}" class="btn btn-outline-dark mr-2" style="padding: 10px 28px">
-      <i class="fas fa-list mr-1"></i> My Bookings
+  <div class="confirm-actions">
+    <a href="{% url 'movies:booking_history' %}" class="btn-ghost">
+      <i class="fas fa-ticket-alt me-2"></i> View My Tickets
     </a>
-    <a href="{% url 'movies:movie_list' %}" class="btn btn-bms" style="padding: 10px 28px">
-      <i class="fas fa-film mr-1"></i> Browse Movies
+    <a href="{% url 'home' %}" class="btn-bms shadow-glow">
+      <i class="fas fa-home me-2"></i> Back to Home
     </a>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Container ── */
+.confirm-wrap { max-width: 450px; margin: 40px auto 60px; animation: fadeInUp 0.6s ease both; }
+
+.check-ring {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  font-size: 2.5rem; color: #10b981;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+}
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Ticket Card ── */
+.ticket-card {
+  background: var(--bms-card-bg);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  position: relative;
+  /* subtle border */
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Ticket Top / Art */
+.ticket-art {
+  height: 200px;
+  background-size: cover;
+  background-position: center 20%;
+  position: relative;
+  display: flex; align-items: flex-end;
+}
+.ticket-art-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, var(--bms-card-bg) 0%, rgba(24,24,24,0.8) 40%, rgba(24,24,24,0.3) 100%);
+}
+.ticket-art-content {
+  position: relative; z-index: 10;
+  padding: 24px 30px; width: 100%;
+}
+.movie-name {
+  font-family: var(--font-heading);
+  font-weight: 800; font-size: 1.6rem;
+  color: #fff; margin: 0 0 4px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+.theater-name {
+  color: rgba(255,255,255,0.8); font-size: 0.9rem; margin: 0;
+}
+
+/* Ticket perforation */
+.ticket-perforation {
+  display: flex; align-items: center;
+  background: var(--bms-card-bg);
+  height: 40px; position: relative;
+}
+.ticket-perforation::before,
+.ticket-perforation::after {
+  content: ''; position: absolute;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--bms-dark);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* creates illusion of a hole */
+}
+.ticket-perforation::before { left: -15px; }
+.ticket-perforation::after { right: -15px; }
+.ticket-dashes {
+  position: absolute; left: 24px; right: 24px; top: 50%; transform: translateY(-50%);
+  border-top: 2px dashed rgba(255,255,255,0.15);
+}
+
+/* Ticket Body details */
+.ticket-body { padding: 30px; }
+.detail-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+.detail-value { font-size: 1.1rem; font-weight: 700; color: var(--bms-text); font-family: var(--font-heading); }
+.text-accent { color: var(--bms-accent) !important; text-shadow: 0 0 10px rgba(229, 9, 20, 0.3); }
+
+/* Barcode / QR Area */
+.barcode-area {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 20px; text-align: center;
+  margin-top: 10px;
+}
+.qr-placeholder { font-size: 4rem; color: #fff; opacity: 0.9; margin-bottom: 12px; }
+.booking-id { font-size: 0.85rem; color: var(--text-muted); font-family: 'Inter', monospace; letter-spacing: 1px; }
+
+/* Actions */
+.confirm-actions { display: flex; gap: 16px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+.confirm-actions a { flex: 1; min-width: 160px; display: flex; justify-content: center; }
+
+@media (max-width: 576px) {
+  .confirm-wrap { padding: 0 15px; }
+  .confirm-actions { flex-direction: column; }
+}
+</style>
 {% endblock %}

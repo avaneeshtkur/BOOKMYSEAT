@@ -1,130 +1,214 @@
 {% extends "users/basic.html" %}
 
-{% block title %}Login - BookMySeat{% endblock %}
+{% block title %}Login — BookMySeat{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="auth-wrapper fade-in-up">
+  <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h2 class="mb-0">
-                        <i class="fas fa-sign-in-alt me-2"></i> Login
-                    </h2>
-                </div>
-                <div class="card-body">
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <strong>Login Failed!</strong>
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endif %}
-
-                    <form method="POST" action="{% url 'login' %}" novalidate>
-                        {% csrf_token %}
-                        
-                        <!-- Username Field -->
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">
-                                <i class="fas fa-user me-2"></i> Username
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-user"></i>
-                                </span>
-                                {{ form.username }}
-                            </div>
-                            {% if form.username.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.username.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Password Field -->
-                        <div class="mb-3">
-                            <label for="{{ form.password.id_for_label }}" class="form-label">
-                                <i class="fas fa-lock me-2"></i> Password
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                {{ form.password }}
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                            {% if form.password.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Remember Me -->
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" name="remember_me" id="id_remember_me">
-                            <label class="form-check-label" for="id_remember_me">
-                                <i class="fas fa-check-circle me-1"></i> Remember me
-                            </label>
-                        </div>
-
-                        <!-- Login Button -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-sign-in-alt me-2"></i> Login
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer">
-                    <div class="row">
-                        <div class="col-md-6 text-center">
-                            <a href="{% url 'password_reset' %}" class="text-decoration-none">
-                                <i class="fas fa-key me-1"></i> Forgot Password?
-                            </a>
-                        </div>
-                        <div class="col-md-6 text-center">
-                            <a href="{% url 'register' %}" class="text-decoration-none">
-                                <i class="fas fa-user-plus me-1"></i> Sign Up
-                            </a>
-                        </div>
-                    </div>
-                </div>
+      <div class="col-lg-5 col-md-8 col-sm-10">
+        
+        <div class="auth-card">
+          <!-- Header -->
+          <div class="auth-header">
+            <div class="auth-icon-box">
+              <i class="fas fa-sign-in-alt"></i>
             </div>
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to book your next cinematic journey</p>
+          </div>
+
+          <div class="auth-body">
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger bms-alert">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                <div class="flex-grow-1">
+                  <strong>Login failed.</strong>
+                  {% for error in form.non_field_errors %}
+                  <div class="small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            </div>
+            {% endif %}
+
+            <form id="loginForm" method="POST" action="{% url 'login' %}" novalidate>
+              {% csrf_token %}
+
+              <!-- Username -->
+              <div class="form-group mb-4">
+                <label for="{{ form.username.id_for_label }}" class="form-label auth-label">
+                  Username <span class="text-accent">*</span>
+                </label>
+                <div class="input-group-custom">
+                  <i class="fas fa-user text-muted"></i>
+                  <input
+                    type="text"
+                    id="{{ form.username.id_for_label }}"
+                    name="username"
+                    class="auth-input has-icon {% if form.username.errors %}is-invalid{% endif %}"
+                    value="{{ form.username.value|default:'' }}"
+                    placeholder="Enter your username"
+                    required
+                    autocomplete="username"
+                    autofocus
+                  >
+                </div>
+                {% if form.username.errors %}
+                <div class="text-danger small mt-2">
+                  <i class="fas fa-exclamation-triangle me-1"></i>{% for e in form.username.errors %}{{ e }}{% endfor %}
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Password -->
+              <div class="form-group mb-4">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                  <label for="{{ form.password.id_for_label }}" class="form-label auth-label mb-0">
+                    Password <span class="text-accent">*</span>
+                  </label>
+                  <a href="{% url 'password_reset' %}" class="small auth-link" style="font-weight: 600;">Forgot?</a>
+                </div>
+                
+                <div class="input-group-custom">
+                  <i class="fas fa-lock text-muted"></i>
+                  <input
+                    type="password"
+                    id="{{ form.password.id_for_label }}"
+                    name="password"
+                    class="auth-input has-icon {% if form.password.errors %}is-invalid{% endif %}"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                  >
+                  <button class="btn-toggle-pass" type="button" id="togglePassword">
+                    <i class="far fa-eye" id="toggleIcon"></i>
+                  </button>
+                </div>
+                {% if form.password.errors %}
+                <div class="text-danger small mt-2">
+                  <i class="fas fa-exclamation-triangle me-1"></i>{% for e in form.password.errors %}{{ e }}{% endfor %}
+                </div>
+                {% endif %}
+              </div>
+
+              <button type="submit" class="btn-bms w-100 btn-lg shadow-glow shadow-none mt-2">
+                <i class="fas fa-sign-in-alt me-2"></i> Sign In
+              </button>
+            </form>
+          </div>
+
+          <div class="auth-footer">
+            <p class="mb-0">New to BookMySeat? 
+              <a href="{% url 'register' %}" class="auth-link">Create Account</a>
+            </p>
+          </div>
         </div>
+
+      </div>
     </div>
+  </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
+<style>
+.auth-wrapper {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  padding: 40px 0;
+}
+.auth-card {
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.auth-header {
+  padding: 50px 40px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.auth-icon-box {
+  width: 70px; height: 70px;
+  background: var(--bms-gradient-accent);
+  border-radius: 50%;
+  border: 4px solid var(--bms-card-bg);
+  box-shadow: 0 10px 25px rgba(229, 9, 20, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; color: #fff;
+  margin: 0 auto 24px;
+}
+.auth-title { font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.5px; }
+.auth-subtitle { color: var(--text-muted); font-size: 1rem; margin: 0; }
+
+.auth-body { padding: 40px; }
+
+.auth-label {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
+}
+.text-accent { color: var(--bms-accent); }
+
+.input-group-custom { position: relative; display: flex; align-items: center; }
+.input-group-custom > i:first-child { position: absolute; left: 16px; z-index: 5; pointer-events: none; }
+.auth-input {
+  width: 100%; padding: 14px 16px 14px 44px;
+  background: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: 12px;
+  color: var(--bms-text); font-size: 1rem;
+  transition: all 0.3s;
+}
+.auth-input:focus { border-color: var(--bms-accent); outline: none; box-shadow: 0 0 0 2px var(--bms-accent-glow); background: #333; }
+.auth-input.is-invalid { border-color: #ff4040; box-shadow: 0 0 0 2px rgba(255, 64, 64, 0.2); }
+
+.btn-toggle-pass {
+  position: absolute; right: 12px;
+  background: transparent; border: none;
+  color: var(--text-muted);
+  cursor: pointer; padding: 6px;
+  transition: color 0.2s; z-index: 5;
+}
+.btn-toggle-pass:hover { color: #fff; }
+
+.bms-alert { background: rgba(255, 64, 64, 0.1); border: 1px solid rgba(255, 64, 64, 0.3); color: #ff4040; border-radius: 12px; }
+
+.auth-footer {
+  text-align: center; padding: 24px;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.95rem; color: var(--text-muted);
+}
+.auth-link { color: var(--bms-accent); font-weight: 600; text-decoration: none; transition: all 0.2s; }
+.auth-link:hover { color: #ff4040; letter-spacing: 0.5px; }
+
+@media (max-width: 576px) {
+  .auth-header { padding: 40px 24px 20px; }
+  .auth-body { padding: 30px 24px; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add Bootstrap form-control class to inputs
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            if (!input.classList.contains('form-check-input')) {
-                input.classList.add('form-control');
-            }
-        });
+(function() {
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+  const toggleIcon = document.getElementById('toggleIcon');
 
-        // Password visibility toggle
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordField = document.getElementById('{{ form.password.id_for_label }}');
-        const toggleIcon = document.getElementById('toggleIcon');
-
-        if (togglePassword && passwordField) {
-            togglePassword.addEventListener('click', function(e) {
-                e.preventDefault();
-                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordField.setAttribute('type', type);
-                toggleIcon.classList.toggle('fa-eye');
-                toggleIcon.classList.toggle('fa-eye-slash');
-            });
-        }
+  if (togglePassword && passwordField) {
+    togglePassword.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isPass = passwordField.type === 'password';
+      passwordField.type = isPass ? 'text' : 'password';
+      toggleIcon.className = isPass ? 'far fa-eye-slash' : 'far fa-eye';
     });
+  }
+})();
 </script>
 {% endblock %}

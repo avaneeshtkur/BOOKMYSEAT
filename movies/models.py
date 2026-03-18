@@ -22,15 +22,21 @@ class Movie(models.Model):
     ]
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    genre = models.CharField(max_length=20, choices=GENRE_CHOICES, default="action")
-    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default="english")
+    genre = models.CharField(max_length=20, choices=GENRE_CHOICES, default="action", db_index=True)
+    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default="english", db_index=True)
     duration_minutes = models.PositiveIntegerField(default=120)
     release_date = models.DateField(null=True, blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     poster = models.ImageField(upload_to="posters/", blank=True, null=True)
+    trailer_url = models.URLField(max_length=500, blank=True, null=True, help_text="YouTube trailer URL")
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["genre", "language"]),
+        ]
 
 
 class Theater(models.Model):

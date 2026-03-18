@@ -1,171 +1,368 @@
 {% extends "users/basic.html" %}
+{% load static %}
 
 {% block title %}Movies — BookMySeat{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/trailerPreview.css' %}?v=4">
+<style>
+/* ── Page Header ── */
 .page-header {
-  background: var(--bms-gradient-1);
-  color: #fff;
-  padding: 40px 0 35px;
-  margin: -24px -15px 30px -15px;
-  border-radius: 0 0 24px 24px;
   text-align: center;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.5s ease both;
 }
 .page-header h1 {
-  font-weight: 900;
-  font-size: 2.2rem;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 2.5rem;
   letter-spacing: -0.5px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
+.page-header h1 i { color: var(--bms-accent); }
 .page-header p {
-  opacity: 0.7;
-  font-weight: 300;
+  color: var(--text-muted);
+  font-size: 1.1rem;
 }
+
+/* ── Modern Filter Bar ── */
 .filter-bar {
-  background: #fff;
-  border-radius: var(--bms-border-radius);
-  padding: 22px 28px;
-  box-shadow: var(--bms-shadow-md);
-  margin-bottom: 30px;
-  border: 1px solid rgba(0,0,0,0.04);
-}
-.filter-bar label {
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--bms-text-muted);
-}
-.filter-bar select {
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  padding: 8px 16px;
-  font-weight: 500;
-  transition: border-color 0.25s;
-}
-.filter-bar select:focus {
-  border-color: var(--bms-accent);
-  box-shadow: 0 0 0 3px var(--bms-accent-glow);
-}
-.movie-card {
-  position: relative;
-}
-.movie-card .card-img-top {
-  height: 320px;
-  object-fit: cover;
-}
-.movie-card .card-title {
-  font-weight: 700;
-  font-size: 1.05rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.movie-card .overlay-rating {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(10px);
-  color: #fbbf24;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-.movie-poster-placeholder {
-  height: 320px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bms-card-bg);
+  border: 1px solid var(--bms-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.5);
-  font-size: 3.5rem;
+  flex-wrap: wrap;
+  gap: 15px;
+  animation: fadeInUp 0.6s ease both;
+  box-shadow: var(--bms-shadow-sm);
 }
-.movie-count {
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.filter-select {
+  background: var(--bms-input-bg);
+  border: 1px solid var(--bms-border);
+  color: var(--bms-text);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s;
+  min-width: 160px;
+  cursor: pointer;
+}
+.filter-select:focus {
+  border-color: var(--bms-accent);
+  box-shadow: 0 0 0 2px var(--bms-accent-glow);
+}
+.filter-select option {
+  background: var(--bms-input-bg);
+  color: var(--bms-text);
+}
+.filter-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ── Movie Grid (Netflix Style) ── */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.movie-card-streaming {
+  display: block;
+  text-decoration: none;
+  border-radius: var(--bms-border-radius);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  transform-origin: center bottom;
+  cursor: pointer;
+  animation: fadeInUp 0.8s ease both;
+}
+.movie-card-streaming:hover {
+  transform: scale(1.05) translateY(-5px);
+  z-index: 100;
+}
+.poster-box {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: var(--bms-border-radius);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--bms-shadow-sm);
+  background: var(--bms-input-bg); /* fallback */
+  transition: box-shadow 0.4s;
+}
+.movie-card-streaming:hover .poster-box {
+  box-shadow: var(--bms-shadow-lg);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.poster-box img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.movie-card-streaming:hover .poster-box img { transform: scale(1.05); }
+
+.poster-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s;
+}
+.movie-card-streaming:hover .poster-overlay { opacity: 1; }
+.play-btn-circle {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem;
+  transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.movie-card-streaming:hover .play-btn-circle { transform: scale(1); }
+
+.rating-badge {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px; border-radius: 6px;
+  font-weight: 700; font-size: 0.85rem; color: #fff;
+  display: flex; align-items: center; gap: 4px;
+}
+
+.movie-info {
+  background: var(--bms-card-bg);
+  padding: 16px;
+  border-bottom-left-radius: var(--bms-border-radius);
+  border-bottom-right-radius: var(--bms-border-radius);
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  opacity: 0; visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.6);
+  border: 1px solid var(--bms-border);
+  border-top: none;
+}
+.movie-card-streaming:hover .movie-info {
+  opacity: 1; visibility: visible;
+  transform: translateY(0);
+}
+.movie-title {
+  color: var(--bms-text); font-family: var(--font-heading);
+  font-size: 1.1rem; font-weight: 700;
+  margin: 0 0 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.movie-tags {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; font-weight: 600; color: var(--bms-text); margin-bottom: 8px;
+}
+.quality-badge { border: 1px solid var(--bms-border); padding: 1px 4px; border-radius: 4px; color: var(--text-muted); }
+.age-badge { border: 1px solid var(--bms-border); padding: 1px 4px; border-radius: 4px; color: var(--text-muted); }
+.movie-genres { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+
+/* Book Button inside overlay */
+.btn-book-sm {
+  width: 100%;
+  padding: 8px;
+  background: rgba(229, 9, 20, 0.1);
+  color: var(--bms-accent);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600; font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.btn-book-sm:hover {
+  background: var(--bms-accent); color: #fff;
+}
+
+/* ── Pagination ── */
+.pagination-wrap {
+  margin-top: 60px;
+  display: flex; justify-content: center;
+}
+.bms-pagination {
+  display: flex; gap: 8px; list-style: none; padding: 0; margin: 0;
+}
+.bms-page-item a, .bms-page-item span {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  background: var(--bms-input-bg);
+  color: var(--bms-text);
+  border: 1px solid var(--bms-border);
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.bms-page-item a:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+}
+.bms-page-item.active span {
   background: var(--bms-accent);
   color: #fff;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-left: 8px;
+  border-color: var(--bms-accent);
 }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 100px 20px;
+}
+.empty-state .icon { font-size: 4rem; color: var(--bms-border); margin-bottom: 20px; }
+.empty-state h3 { font-family: var(--font-heading); color: var(--text-secondary); margin-bottom: 10px; }
+.empty-state p { color: var(--text-muted); }
+
+@media (max-width: 768px) {
+  .movie-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .filter-bar { opacity: 1; transform: none; flex-direction: column; align-items: stretch; }
+  .filter-group { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .filter-select { width: 100%; }
+}
+@media (max-width: 480px) {
+  .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .movie-card-streaming:hover { transform: scale(1.02) translateY(-2px); }
+  .play-btn-circle { width: 40px; height: 40px; font-size: 1rem; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
+
 <div class="page-header">
-  <h1><i class="fas fa-film mr-2"></i> Movies</h1>
-  <p>Discover and book tickets for the latest movies</p>
+  <h1><i class="fas fa-video"></i> All Movies</h1>
+  <p>Find the perfect film for your next cinema trip.</p>
 </div>
 
-<div class="filter-bar">
-  <form method="GET" class="form-inline">
-    <div class="form-group mr-3 mb-2">
-      <label for="genre" class="mr-2">Genre:</label>
-      <select name="genre" id="genre" class="form-control">
-        <option value="">All Genres</option>
-        {% for value, label in genres %}
-        <option value="{{ value }}" {% if selected_genre == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="form-group mr-3 mb-2">
-      <label for="language" class="mr-2">Language:</label>
-      <select name="language" id="language" class="form-control">
-        <option value="">All Languages</option>
-        {% for value, label in languages %}
-        <option value="{{ value }}" {% if selected_language == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn btn-bms mb-2"><i class="fas fa-filter mr-1"></i> Filter</button>
+<!-- ── Filter Bar ── -->
+<form method="GET" class="filter-bar mx-auto" style="max-width: 800px;">
+  <div class="filter-group flex-grow-1">
+    <label for="genre" class="filter-label">Genre</label>
+    <select name="genre" id="genre" class="filter-select w-100">
+      <option value="">All Genres</option>
+      {% for genre in genres %}
+      <option value="{{ genre.value }}" {% if genre.value in selected_genres %}selected{% endif %}>{{ genre.label }} ({{ genre.count }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+  <div class="filter-group flex-grow-1">
+    <label for="language" class="filter-label">Language</label>
+    <select name="language" id="language" class="filter-select w-100">
+      <option value="">All Languages</option>
+      {% for lang in languages %}
+      <option value="{{ lang.value }}" {% if lang.value in selected_languages %}selected{% endif %}>{{ lang.label }} ({{ lang.count }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+  <div class="filter-actions mt-3 mt-md-0 d-flex align-items-end" style="padding-bottom: 2px;">
+    <button type="submit" class="btn-bms pt-2 pb-2 px-4 shadow-none">
+      <i class="fas fa-filter"></i> Apply
+    </button>
     {% if selected_genre or selected_language %}
-    <a href="{% url 'movies:movie_list' %}" class="btn btn-outline-secondary mb-2 ml-2">
-      <i class="fas fa-times mr-1"></i> Clear
+    <a href="{% url 'movies:movie_list' %}" class="btn-ghost pt-2 pb-2 px-3">
+      <i class="fas fa-times"></i>
     </a>
     {% endif %}
-  </form>
-</div>
-
-{% if movies %}
-<div class="row">
-  {% for movie in movies %}
-  <div class="col-lg-3 col-md-4 col-sm-6 mb-4" style="animation: fadeInUp 0.5s ease forwards; animation-delay: {{ forloop.counter0 }}00ms; opacity: 0">
-    <div class="card movie-card h-100">
-      {% if movie.poster %}
-      <div style="overflow: hidden">
-        <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
-      </div>
-      {% else %}
-      <div class="movie-poster-placeholder">
-        <i class="fas fa-film"></i>
-      </div>
-      {% endif %}
-      <span class="overlay-rating"><i class="fas fa-star mr-1"></i> {{ movie.rating }}</span>
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title" title="{{ movie.title }}">{{ movie.title }}</h5>
-        <div class="mb-2">
-          <span class="badge-genre">{{ movie.get_genre_display }}</span>
-          <span class="badge-genre ml-1">{{ movie.get_language_display }}</span>
-        </div>
-        <div class="mb-2 text-muted" style="font-size: 0.85rem">
-          <i class="fas fa-clock mr-1"></i> {{ movie.duration_minutes }} min
-        </div>
-        <p class="text-muted small flex-grow-1" style="line-height: 1.6">{{ movie.description|truncatewords:18 }}</p>
-        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn btn-bms btn-sm mt-auto">
-          <i class="fas fa-ticket-alt mr-1"></i> Book Now
-        </a>
-      </div>
-    </div>
   </div>
+</form>
+
+<!-- ── Movie Grid ── -->
+{% if page_obj %}
+<div class="movie-grid">
+  {% for movie in page_obj %}
+  <a href="{% url 'movies:movie_detail' movie.id %}" class="movie-card-streaming" data-trailer-url="{{ movie.trailer_url }}" data-movie-title="{{ movie.title|escapejs }}" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+    <div class="poster-box">
+      {% if movie.poster %}
+      <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" loading="lazy">
+      {% else %}
+      <div class="h-100 d-flex align-items-center justify-content-center" style="background:var(--bms-input-bg); color:var(--bms-border); font-size:3rem;"><i class="fas fa-film"></i></div>
+      {% endif %}
+      
+      <div class="poster-overlay">
+        <div class="play-btn-circle"><i class="fas fa-play"></i></div>
+      </div>
+      <div class="rating-badge"><i class="fas fa-star text-warning"></i>{{ movie.rating }}</div>
+    </div>
+    
+    <div class="movie-info">
+      <h5 class="movie-title" title="{{ movie.title }}">{{ movie.title }}</h5>
+      <div class="movie-tags">
+        <span class="quality-badge">HD</span>
+        <span><i class="fas fa-clock text-muted me-1"></i>{{ movie.duration_minutes }}m</span>
+      </div>
+      <div class="movie-genres text-truncate">{{ movie.get_genre_display }} • {{ movie.get_language_display }}</div>
+      
+      <div class="btn-book-sm mt-2">Book Tickets</div>
+    </div>
+  </a>
   {% endfor %}
 </div>
-{% else %}
-<div class="text-center py-5">
-  <div style="font-size: 4rem; color: #ddd; margin-bottom: 15px"><i class="fas fa-search"></i></div>
-  <h4 class="text-muted">No movies found</h4>
-  <p class="text-muted">Try adjusting your filters or check back later.</p>
+
+<!-- ── Pagination ── -->
+{% if page_obj.has_other_pages %}
+<div class="pagination-wrap">
+  <ul class="bms-pagination">
+    {% if page_obj.has_previous %}
+    <li class="bms-page-item">
+      <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="Previous">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <li class="bms-page-item active"><span>{{ num }}</span></li>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+      <li class="bms-page-item"><a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li class="bms-page-item">
+      <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" title="Next">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
 </div>
 {% endif %}
+
+{% else %}
+<!-- ── Empty State ── -->
+<div class="empty-state">
+  <div class="icon"><i class="fas fa-ticket-alt"></i></div>
+  <h3>No movies found</h3>
+  <p>Try clearing your filters to see more results.</p>
+  <a href="{% url 'movies:movie_list' %}" class="btn-ghost mt-3">Clear Filters</a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/trailer.bundle.js' %}"></script>
 {% endblock %}
