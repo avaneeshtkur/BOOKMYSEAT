@@ -206,6 +206,7 @@ section .container {
   position: relative;
   z-index: 10;
   padding-top: 80px;
+  padding-bottom: 80px;
 }
 .hero-tag {
   display: inline-flex;
@@ -265,8 +266,21 @@ section .container {
 .btn-play {
   font-size: 1.1rem;
   padding: 14px 36px;
-  border-radius: 8px;
+  border-radius: 30px;
   gap: 12px;
+  text-decoration: none !important;
+  background: linear-gradient(135deg, var(--bms-accent) 0%, rgba(229,9,20,0.8) 100%);
+  box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
+  transition: all 0.3s ease;
+  color: #fff !important;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+}
+.btn-play:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(229, 9, 20, 0.6);
+  background: linear-gradient(135deg, rgba(229,9,20,1) 0%, rgba(200,0,10,1) 100%);
 }
 .btn-play i { font-size: 1.2rem; }
 
@@ -284,9 +298,9 @@ section .container {
 .offset-up {
   position: relative;
   z-index: 20;
-  margin-top: -120px;
+  margin-top: -20px;
   padding-bottom: 80px;
-  background: linear-gradient(to bottom, transparent, var(--bms-dark) 20%);
+  background: linear-gradient(to bottom, transparent, var(--bms-dark) 5%);
 }
 .see-all-link {
   color: var(--text-muted);

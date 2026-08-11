@@ -1,0 +1,176 @@
+/* trailerPreview.css — Netflix-style smooth trailer hover + fullscreen modal */
+
+/* ── Movie Card Hover Scale ── */
+[data-trailer-url] {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease,
+              z-index 0s 0s;
+  z-index: 1;
+}
+
+[data-trailer-url]:hover {
+  transform: scale(1.15);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+  z-index: 20;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease,
+              z-index 0s 0s;
+}
+
+/* Detail page poster pop-out */
+.detail-poster-wrapper {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), z-index 0s;
+}
+
+.detail-poster-wrapper:hover {
+  transform: scale(1.25) translateY(-10px);
+  z-index: 50;
+}
+
+/* ── Trailer Preview Overlay ── */
+.trailer-preview-container {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99;
+  transition: opacity 0.4s ease;
+  background: #000;
+}
+
+.trailer-preview-container.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Blurred glow backdrop behind the preview */
+.trailer-preview-container::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: inherit;
+  filter: blur(10px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.trailer-preview-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  pointer-events: none; /* Hover handled by card */
+}
+
+/* ── Fallback Text ── */
+.trailer-unavailable {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  background: rgba(0,0,0,0.6);
+}
+
+/* ── Fullscreen Modal Overlay ── */
+#trailer-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#trailer-modal.active {
+  display: flex;
+  animation: tModalIn 0.3s ease both;
+}
+
+@keyframes tModalIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal Box ── */
+.tm-box {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  animation: tBoxSlide 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes tBoxSlide {
+  from { transform: scale(0.93) translateY(20px); opacity: 0; }
+  to   { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+/* ── 16:9 Video Wrapper ── */
+.tm-video {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+}
+
+.tm-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.tm-video .trailer-unavailable {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+/* ── Close Button ── */
+.tm-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  background: #e94560;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  line-height: 1;
+}
+
+.tm-close:hover {
+  background: #c0392b;
+  transform: scale(1.15) rotate(90deg);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .tm-close { top: -38px; width: 30px; height: 30px; font-size: 0.85rem; }
+  #trailer-modal { padding: 16px; }
+}

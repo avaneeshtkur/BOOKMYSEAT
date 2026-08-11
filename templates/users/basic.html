@@ -205,12 +205,14 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        text-decoration: none;
       }
       .btn-bms:hover {
         background: var(--bms-accent-hover);
         color: #fff;
         transform: scale(1.05);
         box-shadow: 0 8px 25px var(--bms-accent-glow);
+        text-decoration: none;
       }
       .btn-bms:active { transform: scale(0.98); }
 
@@ -393,7 +395,24 @@
       }
       html[data-theme="light"] .navbar.scrolled .nav-link,
       html[data-theme="light"] .navbar.scrolled .navbar-brand { color: #1a1a2e !important; }
-      html[data-theme="light"] .navbar.scrolled #themeToggle { color: #1a1a2e; }
+      @media (max-width: 991.98px) {
+        .navbar-collapse {
+          background: rgba(20, 20, 20, 0.98);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          padding: 20px;
+          border-radius: 16px;
+          margin-top: 12px;
+          border: 1px solid var(--bms-border);
+          box-shadow: var(--bms-shadow-md);
+        }
+        html[data-theme="light"] .navbar-collapse {
+          background: rgba(255, 255, 255, 0.98);
+        }
+        .main-content {
+          padding-top: 70px;
+        }
+      }
 
       {% block extra_css %}{% endblock %}
     </style>
@@ -530,9 +549,10 @@
             <h5>Stay Updated</h5>
             <p>Subscribe to our newsletter for exclusive offers and trailer drops.</p>
             <div class="d-flex gap-2 mt-3">
-              <input type="email" class="form-control" placeholder="Enter your email" style="background: rgba(255,255,255,0.05);">
-              <button class="btn-bms p-2 px-3"><i class="fas fa-paper-plane"></i></button>
+              <input type="email" id="newsletterEmail" class="form-control" placeholder="Enter your email" style="background: #ffffff; color: #000; border: 1px solid #ccc;">
+              <button id="newsletterSubscribeBtn" class="btn-bms p-2 px-3"><i class="fas fa-paper-plane"></i></button>
             </div>
+            <div id="newsletterMessage" class="mt-2 small" style="display: none;"></div>
           </div>
         </div>
         
@@ -588,6 +608,65 @@
         applyTheme(next);
         localStorage.setItem('bms-theme', next);
       });
+
+      // Newsletter subscription logic
+      const newsletterEmail = document.getElementById('newsletterEmail');
+      const newsletterBtn = document.getElementById('newsletterSubscribeBtn');
+      const newsletterMsg = document.getElementById('newsletterMessage');
+
+      if (newsletterBtn) {
+        newsletterBtn.addEventListener('click', () => {
+          const email = newsletterEmail.value.trim();
+          if (!email) {
+            newsletterMsg.style.display = 'block';
+            newsletterMsg.className = 'mt-2 small text-danger';
+            newsletterMsg.innerText = 'Please enter an email address.';
+            return;
+          }
+
+          newsletterBtn.disabled = true;
+          const formData = new FormData();
+          formData.append('email', email);
+
+          // Get CSRF Token from cookie
+          let csrfToken = '';
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+              csrfToken = cookie.substring('csrftoken='.length);
+              break;
+            }
+          }
+
+          fetch('/newsletter/subscribe/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': csrfToken
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            newsletterBtn.disabled = false;
+            newsletterMsg.style.display = 'block';
+            if (data.success) {
+              newsletterMsg.className = 'mt-2 small text-success';
+              newsletterMsg.innerText = data.message;
+              newsletterEmail.value = '';
+            } else {
+              newsletterMsg.className = 'mt-2 small text-danger';
+              newsletterMsg.innerText = data.error || 'Something went wrong.';
+            }
+          })
+          .catch(err => {
+            newsletterBtn.disabled = false;
+            newsletterMsg.style.display = 'block';
+            newsletterMsg.className = 'mt-2 small text-danger';
+            newsletterMsg.innerText = 'An error occurred. Please try again.';
+          });
+        });
+      }
     </script>
 
     {% block extra_js %}{% endblock %}

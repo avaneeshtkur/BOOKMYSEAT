@@ -16,7 +16,7 @@
 
   <!-- Cinematic Ticket -->
   <div class="ticket-card">
-    <div class="ticket-art" style="{% if booking.show.movie.poster %}background-image: url('{{ booking.show.movie.poster.url }}');{% else %}background: linear-gradient(135deg, #1f0814, #141414);{% endif %}">
+    <div class="ticket-art" style="{% if booking.show.movie.poster %}background-image: url('{{ booking.show.movie.poster_url }}');{% else %}background: linear-gradient(135deg, #1f0814, #141414);{% endif %}">
       <div class="ticket-art-overlay"></div>
       <div class="ticket-art-content">
         <div class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 mb-2">Confirmed</div>

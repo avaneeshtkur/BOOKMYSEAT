@@ -1,105 +1,257 @@
 {% extends "users/basic.html" %}
 {% load static %}
 
-{% block title %}Admin Dashboard — BookMySeat{% endblock %}
+{% block title %}Advanced Admin Analytics — BookMySeat{% endblock %}
 
 {% block content %}
 <div class="row mb-4 fade-in-up">
-  <div class="col-12 d-flex justify-content-between align-items-center">
+  <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
     <div>
-      <h2 class="section-title mb-1"><i class="fas fa-chart-pie accent me-2"></i>Admin Dashboard</h2>
-      <p class="text-muted">Overview of platform metrics and performance</p>
+      <h2 class="section-title mb-1"><i class="fas fa-chart-pie accent me-2"></i>Admin Analytics Dashboard</h2>
+      <p class="text-muted mb-0">Real-time performance metrics, revenue trends & database aggregations</p>
     </div>
-    <div class="d-none d-md-block">
-      <div class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 p-2">
-        <i class="fas fa-shield-alt me-1"></i> Admin Privileges Active
-      </div>
+    <div class="d-flex align-items-center gap-3">
+      <button id="refreshBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+        <i class="fas fa-sync-alt me-1" id="refreshIcon"></i> Refresh Data
+      </button>
+      <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 p-2">
+        <i class="fas fa-bolt me-1"></i> In-Memory Cache Active
+      </span>
     </div>
   </div>
 </div>
 
-<!-- ── Stats Overview ── -->
-<div class="row g-4 mb-5">
-  <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
-    <div class="stat-card">
-      <div class="stat-icon bms-primary-soft"><i class="fas fa-users"></i></div>
-      <div class="stat-info">
-        <h5 class="stat-label">Total Users</h5>
-        <h2 class="stat-value">{{ total_users|default:"0" }}</h2>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
-    <div class="stat-card">
+<!-- ── KPI Stat Cards Row (6 Metric Cards) ── -->
+<div class="row g-3 mb-4">
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.05s;">
+    <div class="stat-card h-100">
       <div class="stat-icon bms-success-soft"><i class="fas fa-rupee-sign"></i></div>
       <div class="stat-info">
         <h5 class="stat-label">Total Revenue</h5>
-        <h2 class="stat-value text-success">₹{{ total_revenue|default:"0" }}</h2>
+        <h3 class="stat-value text-success">₹{{ analytics.total_revenue|floatformat:2 }}</h3>
+        <span class="stat-subtext text-muted">Confirmed bookings</span>
       </div>
     </div>
   </div>
-  
-  <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
-    <div class="stat-card">
+
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="stat-card h-100">
+      <div class="stat-icon bms-primary-soft"><i class="fas fa-calendar-day"></i></div>
+      <div class="stat-info">
+        <h5 class="stat-label">Today's Revenue</h5>
+        <h3 class="stat-value text-primary">₹{{ analytics.today_revenue|floatformat:2 }}</h3>
+        <span class="stat-subtext text-muted">Since midnight</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.15s;">
+    <div class="stat-card h-100">
       <div class="stat-icon bms-info-soft"><i class="fas fa-ticket-alt"></i></div>
       <div class="stat-info">
         <h5 class="stat-label">Total Bookings</h5>
-        <h2 class="stat-value text-info">{{ total_bookings|default:"0" }}</h2>
+        <h3 class="stat-value text-info">{{ analytics.total_bookings }}</h3>
+        <span class="stat-subtext text-muted">Confirmed transactions</span>
       </div>
     </div>
   </div>
-  
-  <div class="col-xl-3 col-md-6 fade-in-up" style="animation-delay: 0.4s;">
-    <div class="stat-card">
+
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
+    <div class="stat-card h-100">
+      <div class="stat-icon bms-danger-soft"><i class="fas fa-times-circle"></i></div>
+      <div class="stat-info">
+        <h5 class="stat-label">Cancellation Rate</h5>
+        <h3 class="stat-value text-danger">{{ analytics.cancellation_rate }}%</h3>
+        <span class="stat-subtext text-muted">{{ analytics.cancelled_count }} cancelled</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.25s;">
+    <div class="stat-card h-100">
       <div class="stat-icon bms-accent-soft"><i class="fas fa-film"></i></div>
       <div class="stat-info">
         <h5 class="stat-label">Active Movies</h5>
-        <h2 class="stat-value text-accent">{{ total_movies|default:"0" }}</h2>
+        <h3 class="stat-value text-accent">{{ analytics.total_movies }}</h3>
+        <span class="stat-subtext text-muted">Catalog size</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-sm-6 fade-in-up" style="animation-delay: 0.3s;">
+    <div class="stat-card h-100">
+      <div class="stat-icon bms-warning-soft"><i class="fas fa-building"></i></div>
+      <div class="stat-info">
+        <h5 class="stat-label">Theaters</h5>
+        <h3 class="stat-value text-warning">{{ analytics.total_theaters }}</h3>
+        <span class="stat-subtext text-muted">{{ analytics.total_shows }} active shows</span>
       </div>
     </div>
   </div>
 </div>
 
-<div class="row g-4 mb-5">
-  <!-- ── Recent Bookings ── -->
-  <div class="col-xl-8 fade-in-up" style="animation-delay: 0.5s;">
-    <div class="dashboard-panel">
-      <div class="panel-header">
-        <h4 class="m-0"><i class="fas fa-history text-muted me-2"></i>Recent Bookings</h4>
-        <a href="#" class="btn-ghost btn-sm px-3">View All</a>
+<!-- ── Charts Section (Revenue Trends & Peak Hours) ── -->
+<div class="row g-4 mb-4">
+  <!-- Revenue Trend Chart -->
+  <div class="col-xl-7 fade-in-up" style="animation-delay: 0.35s;">
+    <div class="dashboard-panel h-100">
+      <div class="panel-header flex-wrap gap-2">
+        <h4 class="m-0"><i class="fas fa-chart-line text-success me-2"></i>Revenue Aggregations</h4>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-danger active" id="btnDaily">Daily (7D)</button>
+          <button type="button" class="btn btn-outline-danger" id="btnWeekly">Weekly (4W)</button>
+          <button type="button" class="btn btn-outline-danger" id="btnMonthly">Monthly (6M)</button>
+        </div>
       </div>
-      
+      <div class="panel-body">
+        <div style="position: relative; height: 300px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peak Booking Hours Chart -->
+  <div class="col-xl-5 fade-in-up" style="animation-delay: 0.4s;">
+    <div class="dashboard-panel h-100">
+      <div class="panel-header">
+        <h4 class="m-0"><i class="fas fa-clock text-info me-2"></i>Peak Booking Hours</h4>
+        <span class="badge bg-secondary">24-Hour Distribution</span>
+      </div>
+      <div class="panel-body">
+        <div style="position: relative; height: 300px;">
+          <canvas id="peakHoursChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Rankings Section (Popular Movies & Busiest Theaters) ── -->
+<div class="row g-4 mb-4">
+  <!-- Most Popular Movies -->
+  <div class="col-xl-6 fade-in-up" style="animation-delay: 0.45s;">
+    <div class="dashboard-panel h-100">
+      <div class="panel-header">
+        <h4 class="m-0"><i class="fas fa-fire text-accent me-2"></i>Most Popular Movies</h4>
+        <span class="text-muted small">Based on confirmed bookings</span>
+      </div>
+      <div class="panel-body">
+        {% if analytics.popular_movies_list %}
+        <div class="d-flex flex-column gap-3">
+          {% for movie in analytics.popular_movies_list %}
+          <div class="d-flex align-items-center justify-content-between p-3 rounded glass-panel">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rank-badge">{{ forloop.counter }}</div>
+              <div>
+                <h6 class="m-0 fw-bold text-white">{{ movie.title }}</h6>
+                <small class="text-muted">{{ movie.genre }}</small>
+              </div>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-danger bg-opacity-25 text-danger px-3 py-2 border border-danger border-opacity-25">
+                {{ movie.booking_count }} bookings
+              </span>
+              <div class="small text-success mt-1 fw-bold">₹{{ movie.revenue|floatformat:2 }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">No movie booking data available.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Busiest Theaters (Occupancy Rate) -->
+  <div class="col-xl-6 fade-in-up" style="animation-delay: 0.5s;">
+    <div class="dashboard-panel h-100">
+      <div class="panel-header">
+        <h4 class="m-0"><i class="fas fa-theater-masks text-warning me-2"></i>Busiest Theaters</h4>
+        <span class="text-muted small">Based on seat occupancy rate</span>
+      </div>
+      <div class="panel-body">
+        {% if analytics.busiest_theaters %}
+        <div class="d-flex flex-column gap-3">
+          {% for theater in analytics.busiest_theaters %}
+          <div class="p-3 rounded glass-panel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <h6 class="m-0 fw-bold text-white">{{ theater.name }}</h6>
+                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ theater.location }}</small>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-warning bg-opacity-25 text-warning px-3 py-2 border border-warning border-opacity-25 fs-6">
+                  {{ theater.occupancy_rate }}% Occupied
+                </span>
+              </div>
+            </div>
+            <div class="progress" style="height: 8px; background: rgba(255,255,255,0.05);">
+              <div class="progress-bar bg-warning" role="progressbar" 
+                   style="width: {{ theater.occupancy_rate }}%;" 
+                   aria-valuenow="{{ theater.occupancy_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+              <span>Booked Seats: {{ theater.booked_seats }}</span>
+              <span>Total Show Capacity: {{ theater.total_capacity }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">No theater occupancy data available.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tables Section (Recent Bookings & Top Customers) ── -->
+<div class="row g-4 mb-5">
+  <!-- Recent Bookings Table -->
+  <div class="col-xl-7 fade-in-up" style="animation-delay: 0.55s;">
+    <div class="dashboard-panel h-100">
+      <div class="panel-header">
+        <h4 class="m-0"><i class="fas fa-history text-muted me-2"></i>Real-Time Recent Bookings</h4>
+        <span class="badge bg-primary">Latest 15</span>
+      </div>
       <div class="panel-body p-0">
         {% if recent_bookings %}
         <div class="table-responsive">
           <table class="table table-dark table-hover mb-0 bms-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Booking ID</th>
                 <th>User</th>
                 <th>Movie</th>
-                <th>Date & Time</th>
+                <th>Time</th>
+                <th>Amount</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {% for booking in recent_bookings %}
+              {% for b in recent_bookings %}
               <tr>
-                <td class="text-muted fw-bold">#{{ booking.id }}</td>
+                <td class="fw-bold text-muted">#{{ b.id }}</td>
                 <td>
                   <div class="d-flex align-items-center gap-2">
-                    <div class="avatar-sm">{{ booking.user.username.0|upper }}</div>
-                    <span>{{ booking.user.username }}</span>
+                    <div class="avatar-sm">{{ b.user.username.0|upper }}</div>
+                    <span>{{ b.user.username }}</span>
                   </div>
                 </td>
-                <td class="fw-bold">{{ booking.show.movie.title }}</td>
-                <td class="text-muted" style="font-size: 0.85rem;">{{ booking.booking_time|date:"d M Y, h:i A" }}</td>
+                <td class="fw-bold">{{ b.show.movie.title }}</td>
+                <td class="text-muted small">{{ b.booking_time|date:"d M, h:i A" }}</td>
+                <td class="text-success fw-bold">₹{{ b.total_price }}</td>
                 <td>
-                  {% if booking.status == 'confirmed' %}
+                  {% if b.status == 'confirmed' %}
                   <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">Confirmed</span>
+                  {% elif b.status == 'cancelled' %}
+                  <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50">Cancelled</span>
+                  {% elif b.status == 'failed' %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">Failed</span>
                   {% else %}
-                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">{{ booking.status|title }}</span>
+                  <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">Pending</span>
                   {% endif %}
                 </td>
               </tr>
@@ -108,74 +260,96 @@
           </table>
         </div>
         {% else %}
-        <div class="p-5 text-center text-muted">
-          <i class="fas fa-folder-open mb-3 fs-3 opacity-50"></i>
-          <p class="m-0">No recent bookings found.</p>
-        </div>
+        <div class="p-4 text-center text-muted">No bookings recorded yet.</div>
         {% endif %}
       </div>
     </div>
   </div>
 
-  <!-- ── Popular Movies ── -->
-  <div class="col-xl-4 fade-in-up" style="animation-delay: 0.6s;">
+  <!-- User Spending Leaderboard -->
+  <div class="col-xl-5 fade-in-up" style="animation-delay: 0.6s;">
     <div class="dashboard-panel h-100">
-      <div class="panel-header border-bottom-0 pb-0">
-        <h4 class="m-0"><i class="fas fa-star text-warning me-2"></i>Popular Movies</h4>
+      <div class="panel-header">
+        <h4 class="m-0"><i class="fas fa-trophy text-warning me-2"></i>Top Customers</h4>
+        <span class="text-muted small">By Total Spent</span>
       </div>
-      
-      <div class="panel-body">
-        {% if all_movies_data %}
-        <div class="popular-list mt-3">
-          {% for movie in all_movies_data|slice:":5" %}
-          <div class="popular-item">
-            <div class="item-title text-truncate">{{ movie.title }}</div>
-            <div class="item-badge">{{ movie.booking_count }}</div>
-          </div>
-          {% endfor %}
+      <div class="panel-body p-0">
+        {% if analytics.user_booking_stats %}
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0 bms-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th class="text-center">Bookings</th>
+                <th class="text-end">Total Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in analytics.user_booking_stats %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-sm">{{ u.username.0|upper }}</div>
+                    <div>
+                      <div class="fw-bold">{{ u.username }}</div>
+                      <small class="text-muted" style="font-size: 0.75rem;">Joined {{ u.date_joined }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-info bg-opacity-25 text-info px-2 py-1">{{ u.booking_count }}</span>
+                </td>
+                <td class="text-end fw-bold text-success">
+                  ₹{{ u.total_spent|floatformat:2 }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
         {% else %}
-        <div class="p-4 text-center text-muted h-100 d-flex flex-column align-items-center justify-content-center">
-          <p class="m-0">No movie data available.</p>
-        </div>
+        <div class="p-4 text-center text-muted">No user statistics available.</div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* ── Stat Cards ── */
+/* Stat Cards */
 .stat-card {
   background: var(--bms-card-bg);
   border: 1px solid var(--bms-border);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  display: flex; align-items: center; gap: 20px;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex; align-items: center; gap: 14px;
   box-shadow: var(--bms-shadow-md);
-  transition: transform 0.3s;
+  transition: transform 0.2s ease-in-out;
 }
-.stat-card:hover { transform: translateY(-5px); }
+.stat-card:hover { transform: translateY(-3px); }
 
 .stat-icon {
-  width: 60px; height: 60px; flex-shrink: 0;
-  border-radius: 14px;
+  width: 48px; height: 48px; flex-shrink: 0;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
 }
-.bms-primary-soft { background: rgba(13, 110, 253, 0.1); color: #0d6efd; border: 1px solid rgba(13, 110, 253, 0.2); }
-.bms-success-soft { background: rgba(25, 135, 84, 0.1); color: #198754; border: 1px solid rgba(25, 135, 84, 0.2); }
-.bms-info-soft    { background: rgba(13, 202, 240, 0.1); color: #0dcaf0; border: 1px solid rgba(13, 202, 240, 0.2); }
-.bms-accent-soft  { background: rgba(229, 9, 20, 0.1); color: var(--bms-accent); border: 1px solid rgba(229, 9, 20, 0.2); }
+.bms-primary-soft { background: rgba(13, 110, 253, 0.15); color: #0d6efd; border: 1px solid rgba(13, 110, 253, 0.25); }
+.bms-success-soft { background: rgba(25, 135, 84, 0.15); color: #198754; border: 1px solid rgba(25, 135, 84, 0.25); }
+.bms-info-soft    { background: rgba(13, 202, 240, 0.15); color: #0dcaf0; border: 1px solid rgba(13, 202, 240, 0.25); }
+.bms-accent-soft  { background: rgba(229, 9, 20, 0.15); color: var(--bms-accent); border: 1px solid rgba(229, 9, 20, 0.25); }
+.bms-warning-soft { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.25); }
+.bms-danger-soft  { background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid rgba(220, 53, 69, 0.25); }
 
 .stat-info { flex: 1; min-width: 0; }
-.stat-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 6px; }
-.stat-value { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; color: var(--bms-text); margin: 0; line-height: 1; }
-.text-accent { color: var(--bms-accent) !important; }
+.stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 4px; }
+.stat-value { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; margin: 0; line-height: 1.1; }
+.stat-subtext { font-size: 0.72rem; display: block; margin-top: 2px; }
 
-/* ── Dashboard Panels ── */
+/* Dashboard Panels */
 .dashboard-panel {
   background: var(--bms-card-bg);
   border: 1px solid var(--bms-border);
@@ -185,15 +359,32 @@
   display: flex; flex-direction: column;
 }
 .panel-header {
-  padding: 20px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--bms-border);
   display: flex; justify-content: space-between; align-items: center;
   background: rgba(255,255,255,0.02);
 }
-.panel-header h4 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; color: var(--bms-text); }
-.panel-body { padding: 24px; flex: 1; }
+.panel-header h4 { font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700; color: var(--bms-text); }
+.panel-body { padding: 20px; flex: 1; }
 
-/* ── Custom Table ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.2s;
+}
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rank-badge {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(229, 9, 20, 0.2); color: var(--bms-accent);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.9rem;
+}
+
+/* Custom Table */
 .bms-table { margin-bottom: 0; color: var(--bms-text); background: transparent; }
 .bms-table th {
   font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
@@ -201,38 +392,137 @@
   border-bottom: 1px solid var(--bms-border) !important;
   border-top: none !important;
   background: transparent !important;
-  padding: 16px 24px;
+  padding: 12px 16px;
 }
 .bms-table td {
-  padding: 16px 24px; vertical-align: middle;
+  padding: 12px 16px; vertical-align: middle;
   border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  background: transparent !important; color: rgba(255,255,255,0.85); font-size: 0.95rem;
+  background: transparent !important; color: rgba(255,255,255,0.85); font-size: 0.9rem;
 }
-.bms-table tbody tr { transition: background 0.2s; }
 .bms-table tbody tr:hover { background: rgba(255,255,255,0.03) !important; }
 .bms-table tbody tr:last-child td { border-bottom: none !important; }
 
 .avatar-sm {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   background: linear-gradient(135deg, var(--bms-accent), #ff4040);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; font-weight: 700; color: #fff;
-}
-
-/* ── Popular List ── */
-.popular-list { display: flex; flex-direction: column; gap: 12px; }
-.popular-item {
-  display: flex; justify-content: space-between; align-items: center;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px; padding: 16px 20px;
-  transition: all 0.2s;
-}
-.popular-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
-.item-title { font-weight: 600; color: var(--bms-text); font-size: 0.95rem; }
-.item-badge {
-  background: rgba(13, 110, 253, 0.15); color: #4dabf7;
-  padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js Library CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const analyticsData = {{ analytics_json|safe }};
+
+  // 1. Revenue Chart Setup
+  const ctxRevenue = document.getElementById("revenueChart").getContext("2d");
+  
+  let revenueChart = new Chart(ctxRevenue, {
+    type: "line",
+    data: {
+      labels: analyticsData.daily_labels.length ? analyticsData.daily_labels : ["No Data"],
+      datasets: [{
+        label: "Revenue (₹)",
+        data: analyticsData.daily_data.length ? analyticsData.daily_data : [0],
+        borderColor: "#198754",
+        backgroundColor: "rgba(25, 135, 84, 0.15)",
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: "#198754",
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) { return " Revenue: ₹" + context.raw.toLocaleString(); }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a3a3a3" } },
+        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a3a3a3", callback: (val) => "₹" + val } }
+      }
+    }
+  });
+
+  // Toggle Revenue Periods (Daily, Weekly, Monthly)
+  const btnDaily = document.getElementById("btnDaily");
+  const btnWeekly = document.getElementById("btnWeekly");
+  const btnMonthly = document.getElementById("btnMonthly");
+
+  function setChartData(labels, data, btnActive) {
+    [btnDaily, btnWeekly, btnMonthly].forEach(btn => btn.classList.remove("active"));
+    btnActive.classList.add("active");
+
+    revenueChart.data.labels = labels.length ? labels : ["No Data"];
+    revenueChart.data.datasets[0].data = data.length ? data : [0];
+    revenueChart.update();
+  }
+
+  btnDaily.addEventListener("click", () => setChartData(analyticsData.daily_labels, analyticsData.daily_data, btnDaily));
+  btnWeekly.addEventListener("click", () => setChartData(analyticsData.weekly_labels, analyticsData.weekly_data, btnWeekly));
+  btnMonthly.addEventListener("click", () => setChartData(analyticsData.monthly_labels, analyticsData.monthly_data, btnMonthly));
+
+  // 2. Peak Hours Chart Setup
+  const ctxPeak = document.getElementById("peakHoursChart").getContext("2d");
+  new Chart(ctxPeak, {
+    type: "bar",
+    data: {
+      labels: analyticsData.peak_hours_labels,
+      datasets: [{
+        label: "Bookings",
+        data: analyticsData.peak_hours_data,
+        backgroundColor: "rgba(13, 202, 240, 0.6)",
+        borderColor: "#0dcaf0",
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) { return " Bookings: " + context.raw; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#a3a3a3", maxRotation: 45, minRotation: 45 } },
+        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#a3a3a3", precision: 0 } }
+      }
+    }
+  });
+
+  // 3. Refresh Data Button Logic
+  const refreshBtn = document.getElementById("refreshBtn");
+  const refreshIcon = document.getElementById("refreshIcon");
+
+  refreshBtn.addEventListener("click", function() {
+    refreshIcon.classList.add("fa-spin");
+    fetch("{% url 'admin_analytics_api' %}?refresh=1")
+      .then(res => res.json())
+      .then(data => {
+        window.location.reload();
+      })
+      .catch(err => {
+        console.error("Refresh failed:", err);
+        refreshIcon.classList.remove("fa-spin");
+      });
+  });
+});
+</script>
 {% endblock %}

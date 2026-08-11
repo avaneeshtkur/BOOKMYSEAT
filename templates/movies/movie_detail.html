@@ -7,7 +7,7 @@
 <!-- ── Movie Banner (Edge to Edge) ── -->
 <div class="movie-banner-full">
   {% if movie.poster %}
-  <div class="banner-bg" style="background-image:url('{{ movie.poster.url }}')"></div>
+  <div class="banner-bg" style="background-image:url('{{ movie.poster_url }}')"></div>
   {% else %}
   <div class="banner-bg banner-bg-placeholder"></div>
   {% endif %}
@@ -18,7 +18,7 @@
       <div class="col-lg-3 col-md-4 d-none d-md-block">
         <div class="poster-frame">
           {% if movie.poster %}
-          <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" class="img-fluid">
+          <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="img-fluid">
           {% else %}
           <div class="poster-placeholder-lg"><i class="fas fa-film"></i></div>
           {% endif %}
@@ -39,7 +39,7 @@
           <p class="movie-synopsis">{{ movie.description }}</p>
           
           <div class="banner-actions mt-4">
-            <a href="#showtimes" class="btn-bms btn-bms-lg shadow-glow">
+            <a href="#showtimes" class="btn-bms btn-bms-lg shadow-glow" style="text-decoration: none !important;">
               <i class="fas fa-ticket-alt"></i> Book Tickets
             </a>
             {% if movie.trailer_url %}

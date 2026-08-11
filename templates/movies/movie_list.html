@@ -85,6 +85,28 @@
   gap: 24px;
 }
 
+@media (max-width: 576px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .filter-bar {
+    padding: 14px;
+    gap: 10px;
+  }
+  .filter-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filter-select {
+    flex: 1;
+    min-width: 0;
+  }
+  .page-header h1 {
+    font-size: 1.8rem;
+  }
+}
+
 .movie-card-streaming {
   display: block;
   text-decoration: none;
@@ -98,6 +120,7 @@
 .movie-card-streaming:hover {
   transform: scale(1.05) translateY(-5px);
   z-index: 100;
+  text-decoration: none !important;
 }
 .poster-box {
   width: 100%;
@@ -190,9 +213,11 @@
   text-align: center;
   font-weight: 600; font-size: 0.85rem;
   transition: all 0.2s;
+  text-decoration: none !important;
 }
 .btn-book-sm:hover {
   background: var(--bms-accent); color: #fff;
+  text-decoration: none !important;
 }
 
 /* ── Pagination ── */
@@ -295,7 +320,7 @@
   <a href="{% url 'movies:movie_detail' movie.id %}" class="movie-card-streaming" data-trailer-url="{{ movie.trailer_url }}" data-movie-title="{{ movie.title|escapejs }}" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
     <div class="poster-box">
       {% if movie.poster %}
-      <img src="{{ movie.poster.url }}" alt="{{ movie.title }}" loading="lazy">
+      <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" loading="lazy">
       {% else %}
       <div class="h-100 d-flex align-items-center justify-content-center" style="background:var(--bms-input-bg); color:var(--bms-border); font-size:3rem;"><i class="fas fa-film"></i></div>
       {% endif %}

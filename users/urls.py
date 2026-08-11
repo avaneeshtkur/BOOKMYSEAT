@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, register, login_view, profile, reset_password, home, admin_dashboard
+from .views import index, register, login_view, profile, reset_password, home, admin_dashboard, admin_analytics_api, subscribe_newsletter
 from django.contrib.auth import views as auth_views
 
 
@@ -11,6 +11,8 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("reset-password/", reset_password, name="reset-password"),
     path("admin-dashboard/", admin_dashboard, name="admin_dashboard"),
+    path("admin-dashboard/api/", admin_analytics_api, name="admin_analytics_api"),
+    path("newsletter/subscribe/", subscribe_newsletter, name="subscribe_newsletter"),
     path(
         "logout/",
         auth_views.LogoutView.as_view(template_name="users/logout.html"),

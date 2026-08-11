@@ -2,7 +2,8 @@ import logging
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
-from .models import Booking
+from .models import Booking, SeatLock
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -68,19 +69,28 @@ def _process_booking_email(booking_id, retries=None):
         logger.error(f"Failed to send email for booking {booking_id}. Error: {str(e)}")
         raise e
 
-if HAS_CELERY:
-    @shared_task(bind=True, max_retries=3, default_retry_delay=5)
-    def send_booking_confirmation_email(self, booking_id):
-        """Celery background task"""
-        try:
-            return _process_booking_email(booking_id, retries=self.request.retries)
-        except Exception as e:
-            logger.error(f"Retrying email for booking {booking_id}... ({self.request.retries}/3)")
-            raise self.retry(exc=e)
-else:
-    # Dummy implementation that behaves like a celery task (has a .delay() method)
-    # but executes synchronously.
-    def send_booking_confirmation_email(booking_id):
-        return _process_booking_email(booking_id)
-    
-    send_booking_confirmation_email.delay = lambda booking_id: _process_booking_email(booking_id)
+@shared_task
+def cleanup_expired_locks():
+    """
+    Background Task (Phase 4):
+    Automatically releases seats by deleting expired SeatLock records.
+    Runs every ~15 seconds via Celery Beat.
+    """
+    now = timezone.now()
+    deleted_count, _ = SeatLock.objects.filter(expires_at__lte=now).delete()
+    if deleted_count > 0:
+        logger.info(f"[Cleanup] Released {deleted_count} expired seat locks.")
+    return f"Cleanup: {deleted_count} locks released."
+
+
+import threading
+
+def send_booking_confirmation_email(booking_id):
+    """Send booking confirmation email in a background thread to prevent blocking Vercel serverless request thread."""
+    thread = threading.Thread(target=_process_booking_email, args=(booking_id,))
+    thread.daemon = True
+    thread.start()
+    return f"Background email thread started for booking {booking_id}"
+
+# Retain .delay method signature compatibility so existing callers don't break
+send_booking_confirmation_email.delay = send_booking_confirmation_email

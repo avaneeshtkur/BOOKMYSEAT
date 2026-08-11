@@ -16,17 +16,32 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env values early (lightweight parser to avoid extra deps)
+ENV_PATH = BASE_DIR / ".env"
+if ENV_PATH.exists():
+    for _line in ENV_PATH.read_text().splitlines():
+        if not _line or _line.lstrip().startswith("#") or "=" not in _line:
+            continue
+        k, v = _line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+def _get_env_list(name, default=""):
+    raw = os.getenv(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-9nzlo*qy5^ylk9m*gcx%b#1a3ms_+^@8e4vm=2upuh3ltxw+oh"
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-9nzlo*qy5^ylk9m*gcx%b#1a3ms_+^@8e4vm=2upuh3ltxw+oh")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = _get_env_list("ALLOWED_HOSTS", "127.0.0.1,localhost,localhost:8000,localhost:8001,.vercel.app")
+CSRF_TRUSTED_ORIGINS = _get_env_list("CSRF_TRUSTED_ORIGINS", "https://*.vercel.app")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -45,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,12 +73,12 @@ AUTH_USER_MODEL = "auth.User"
 
 # Email Configuration (Gmail SMTP)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "thakuravaneesh620@gmail.com"
-EMAIL_HOST_PASSWORD = "skvpavairoqrergy"
-DEFAULT_FROM_EMAIL = "BookMySeat <thakuravaneesh620@gmail.com>"
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "thakuravaneesh58@gmail.com")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "skvpavairoqrergy")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "BookMySeat <thakuravaneesh58@gmail.com>")
 
 ROOT_URLCONF = "bookmyseat.urls"
 
@@ -90,10 +106,47 @@ WSGI_APPLICATION = "bookmyseat.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
+# Database configuration with PostgreSQL support (e.g. Neon)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    try:
+        from urllib.parse import urlparse
+        url = urlparse(DATABASE_URL)
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": url.path[1:],
+                "USER": url.username,
+                "PASSWORD": url.password,
+                "HOST": url.hostname,
+                "PORT": url.port or 5432,
+                "OPTIONS": {
+                    "sslmode": "require",
+                }
+            }
+        }
+    except Exception as db_err:
+        print(f"Error parsing DATABASE_URL: {db_err}. Falling back to SQLite.")
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# Caching Configuration (In-Memory LocMemCache for Admin Analytics)
+CACHES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "bookmyseat-analytics",
+        "TIMEOUT": 300,  # 5 minutes TTL
     }
 }
 
@@ -117,10 +170,17 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Media files (user-uploaded content)
 MEDIA_URL = "/media/"
@@ -162,3 +222,8 @@ LOGGING = {
     },
 }
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Payments (Razorpay)
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
