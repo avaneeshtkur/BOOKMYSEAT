@@ -40,8 +40,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-9nzlo*qy5^ylk9m*gcx%b#1a3m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = _get_env_list("ALLOWED_HOSTS", "127.0.0.1,localhost,localhost:8000,localhost:8001,.vercel.app")
-CSRF_TRUSTED_ORIGINS = _get_env_list("CSRF_TRUSTED_ORIGINS", "https://*.vercel.app")
+ALLOWED_HOSTS = _get_env_list("ALLOWED_HOSTS", "127.0.0.1,localhost,localhost:8000,localhost:8001,.onrender.com,.vercel.app")
+CSRF_TRUSTED_ORIGINS = _get_env_list("CSRF_TRUSTED_ORIGINS", "https://*.onrender.com,https://*.vercel.app")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
