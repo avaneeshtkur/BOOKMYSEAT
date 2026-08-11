@@ -14,6 +14,8 @@ try:
     HAS_CELERY = True
 except ImportError:
     HAS_CELERY = False
+    def shared_task(func):
+        return func
 
 def _process_booking_email(booking_id, retries=None):
     """Core logic extracted so it can be run by Celery or synchronously as fallback"""
