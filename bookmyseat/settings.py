@@ -107,32 +107,18 @@ WSGI_APPLICATION = "bookmyseat.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Database configuration with PostgreSQL support (e.g. Neon)
+import dj_database_url
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
-    try:
-        from urllib.parse import urlparse
-        url = urlparse(DATABASE_URL)
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.postgresql",
-                "NAME": url.path[1:],
-                "USER": url.username,
-                "PASSWORD": url.password,
-                "HOST": url.hostname,
-                "PORT": url.port or 5432,
-                "OPTIONS": {
-                    "sslmode": "require",
-                }
-            }
-        }
-    except Exception as db_err:
-        print(f"Error parsing DATABASE_URL: {db_err}. Falling back to SQLite.")
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": BASE_DIR / "db.sqlite3",
-            }
-        }
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
 else:
     DATABASES = {
         "default": {

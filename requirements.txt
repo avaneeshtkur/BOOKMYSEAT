@@ -4,3 +4,5 @@ whitenoise==6.9.0
 pillow==12.2.0
 razorpay==2.0.1
 requests==2.32.5
+dj-database-url==2.3.0
+
