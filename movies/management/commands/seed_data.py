@@ -36,8 +36,24 @@ class Command(BaseCommand):
             "The Conjuring": "conjuring.png",
             "Titanic": "titanic.png",
             "Spider-Man: No Way Home": "spiderman.png",
+            "Coco": "coco.png",
             "K.G.F: Chapter 2": "kgf2.png",
             "Sultan": "sultan.png",
+        }
+
+        # ── Trailer URL mapping ──────────────────────────────────────
+        trailer_map = {
+            "The Dark Knight": "https://www.youtube.com/watch?v=EXeTwQWrcwY",
+            "Inception": "https://www.youtube.com/watch?v=YoHD9XEInc0",
+            "3 Idiots": "https://www.youtube.com/watch?v=xvszmNXdM4w",
+            "Interstellar": "https://www.youtube.com/watch?v=zSWdZVtXT7E",
+            "Dangal": "https://www.youtube.com/watch?v=x_7YlGv9u1g",
+            "The Conjuring": "https://www.youtube.com/watch?v=k10ETZ41q5o",
+            "Titanic": "https://www.youtube.com/watch?v=kVrqfYjkTdQ",
+            "Spider-Man: No Way Home": "https://www.youtube.com/watch?v=JfVOs4VSpmA",
+            "Coco": "https://www.youtube.com/watch?v=Rvr68u6k5sI",
+            "K.G.F: Chapter 2": "https://www.youtube.com/watch?v=JKa05nyUmuQ",
+            "Sultan": "https://www.youtube.com/watch?v=ude2-o23WkA",
         }
 
         # ── Movies ──────────────────────────────────────────────────
@@ -147,16 +163,23 @@ class Command(BaseCommand):
             movie, created = Movie.objects.get_or_create(
                 title=md["title"], defaults=md
             )
-            # Assign poster if available (always update, even for existing movies)
+            # Assign poster and trailer if available (always update, even for existing movies)
+            updated_fields = []
             poster_file = poster_map.get(md["title"])
             if poster_file:
                 movie.poster = f"posters/{poster_file}"
-                movie.save(update_fields=["poster"])
+                updated_fields.append("poster")
+            trailer_url = trailer_map.get(md["title"])
+            if trailer_url:
+                movie.trailer_url = trailer_url
+                updated_fields.append("trailer_url")
+            if updated_fields:
+                movie.save(update_fields=updated_fields)
 
             if created:
-                self.stdout.write(f"  ✓ Movie: {movie.title} (poster: {poster_file or 'none'})")
+                self.stdout.write(f"  ✓ Movie: {movie.title} (poster: {poster_file or 'none'}, trailer: {'yes' if trailer_url else 'no'})")
             else:
-                self.stdout.write(f"  → Movie already exists: {movie.title} (poster updated: {poster_file or 'none'})")
+                self.stdout.write(f"  → Movie already exists: {movie.title} (updated: poster={poster_file or 'none'}, trailer={'yes' if trailer_url else 'no'})")
 
         # ── Shows ───────────────────────────────────────────────────
         screens = list(Screen.objects.all())
