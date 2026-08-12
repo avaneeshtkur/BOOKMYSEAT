@@ -1,4 +1,4 @@
-# 🎟️ BookMySeat — Full Engineering Project Report
+# BookMySeat — Full Engineering Project Report
 
 **Author:** Avaneesh Thakur  
 **Project Name:** BookMySeat — Movie Ticket Reservation & Analytics Platform  
@@ -264,7 +264,7 @@ def payment_page(request):
 ```
 
 #### Real-Time Client Polling
-The seat map template (`select_seats.html`) polls `/movies/shows/<id>/seat-status/` every 3 seconds, rendering locked seats with a gold lock icon (`🔒`) and `cursor: not-allowed` live across concurrent browser sessions.
+The seat map template (`select_seats.html`) polls `/movies/shows/<id>/seat-status/` every 3 seconds, rendering locked seats with a gold lock icon and `cursor: not-allowed` live across concurrent browser sessions.
 
 ---
 
@@ -362,14 +362,14 @@ def admin_dashboard(request):
 
 | Feature Module | Verification Test Executed | Result | Status |
 |---|---|---|---|
-| **Multi-Select Filtering** | Tested combined query `?genre=action&language=english` | Filtered items matching criteria in < 15ms | ✅ Passed |
-| **Dynamic Filter Counts** | Verified genre & language counts update dynamically | Counts match actual DB records across all choices | ✅ Passed |
-| **Seat Concurrency Lock** | User 1 locked seats A1, A2; User 2 attempted booking A1 | User 2 blocked with alert; seats styled yellow with 🔒 icon | ✅ Passed |
-| **Razorpay Verification** | Server HMAC SHA256 verification test | Rejects forged signatures; confirms authentic transactions | ✅ Passed |
-| **Idempotency Safeguard** | Attempted duplicate POST with existing `idempotency_key` | Prevented double billing and duplicate seat allocation | ✅ Passed |
-| **Background Emails** | Triggered booking completion email task | Sent non-blocking HTML email without API delay | ✅ Passed |
-| **Admin Dashboard Security** | Attempted `/admin-dashboard/` access as unauthenticated user | Redirected to staff login screen | ✅ Passed |
-| **Admin Analytics Cache** | Called `admin_analytics_api` with 50,000+ simulated rows | Cached response delivered in < 8ms | ✅ Passed |
+| **Multi-Select Filtering** | Tested combined query `?genre=action&language=english` | Filtered items matching criteria in < 15ms | Passed |
+| **Dynamic Filter Counts** | Verified genre & language counts update dynamically | Counts match actual DB records across all choices | Passed |
+| **Seat Concurrency Lock** | User 1 locked seats A1, A2; User 2 attempted booking A1 | User 2 blocked with alert; seats styled yellow with lock icon | Passed |
+| **Razorpay Verification** | Server HMAC SHA256 verification test | Rejects forged signatures; confirms authentic transactions | Passed |
+| **Idempotency Safeguard** | Attempted duplicate POST with existing `idempotency_key` | Prevented double billing and duplicate seat allocation | Passed |
+| **Background Emails** | Triggered booking completion email task | Sent non-blocking HTML email without API delay | Passed |
+| **Admin Dashboard Security** | Attempted `/admin-dashboard/` access as unauthenticated user | Redirected to staff login screen | Passed |
+| **Admin Analytics Cache** | Called `admin_analytics_api` with 50,000+ simulated rows | Cached response delivered in < 8ms | Passed |
 
 ---
 
@@ -378,4 +378,4 @@ def admin_dashboard(request):
 The **BookMySeat** project successfully satisfies **100% of all required engineering specifications**. By implementing database-level indexing, atomic concurrency control, server-side cryptographic signature validation, non-blocking asynchronous email processing, and caching analytics aggregations, the system provides a robust, production-ready cinema ticketing platform.
 
 **Report Compiled By:** Avaneesh Thakur  
-**Project Status:** 🟢 Production Ready & Deployed on Render.com
+**Project Status:** Production Ready & Deployed on Render.com
