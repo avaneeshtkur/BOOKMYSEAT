@@ -206,7 +206,7 @@ def lock_seats(request):
             SeatLock.objects.bulk_create(new_locks)
             
             # The bulk_create is part of the atomic transaction
-            expiry = now + timezone.timedelta(minutes=2)
+            expiry = now + timedelta(minutes=2)
 
             logger.info(f"[Concurrency] User {request.user.username} locked {len(new_locks)} seats for show {show_id}")
             return JsonResponse({
@@ -441,8 +441,15 @@ def create_razorpay_order(request):
     """
     import razorpay as _razorpay
     import os
-    _key_id     = os.environ.get('RAZORPAY_KEY_ID')
-    _key_secret = os.environ.get('RAZORPAY_KEY_SECRET')
+    _key_id     = getattr(settings, 'RAZORPAY_KEY_ID', '') or os.environ.get('RAZORPAY_KEY_ID', '')
+    _key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '') or os.environ.get('RAZORPAY_KEY_SECRET', '')
+    
+    if not _key_id or not _key_secret:
+        # Fallback dummy order for testing/demo environments where Razorpay keys are not set in ENV
+        logger.warning('[Payment] Razorpay API keys not configured. Falling back to test checkout mode.')
+        _key_id = _key_id or "rzp_test_dummy_key"
+        _key_secret = _key_secret or "dummy_secret"
+    
     client = _razorpay.Client(auth=(_key_id, _key_secret))
 
     try:

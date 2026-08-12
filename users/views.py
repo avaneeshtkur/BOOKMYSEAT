@@ -25,12 +25,6 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # If superuser toggle is on
-            if request.POST.get("is_superuser") == "on":
-                user.is_staff = True
-                user.is_superuser = True
-                user.save()
-
             # Log the user in with the correct backend specified
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect("profile")
