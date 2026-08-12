@@ -182,8 +182,21 @@ class Command(BaseCommand):
                         show_time=t,
                         defaults={"price": 250.00},
                     )
-                    if created:
-                        show_count += 1
+        # ── Admin User ──────────────────────────────────────────────
+        from django.contrib.auth.models import User
+        admin_user, admin_created = User.objects.get_or_create(
+            username="admin",
+            defaults={
+                "email": "thakuravaneesh58@gmail.com",
+                "is_staff": True,
+                "is_superuser": True,
+            }
+        )
+        admin_user.set_password("admin123")
+        admin_user.is_staff = True
+        admin_user.is_superuser = True
+        admin_user.save()
+        self.stdout.write("  ✓ Admin User: admin (password: admin123)")
 
         self.stdout.write(f"  ✓ Created {show_count} new shows")
         self.stdout.write(self.style.SUCCESS("Database seeded successfully!"))
