@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.core.paginator import Paginator
 from django.utils import timezone
+from datetime import timedelta
 from django.conf import settings
 from .models import Movie, Show, Booking, SeatBooking, Payment, SeatLock
 from .tasks import send_booking_confirmation_email
