@@ -31,14 +31,30 @@ def _get_env_list(name, default=""):
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def _get_env(name, default="", *fallback_names):
+    value = os.getenv(name)
+    if value:
+        return value
+    for fallback_name in fallback_names:
+        fallback_value = os.getenv(fallback_name)
+        if fallback_value:
+            return fallback_value
+    return default
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-9nzlo*qy5^ylk9m*gcx%b#1a3ms_+^@8e4vm=2upuh3ltxw+oh")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = _get_env("SECRET_KEY")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-local-dev-only-change-me"
+    else:
+        raise RuntimeError("SECRET_KEY environment variable is required when DEBUG is False.")
 
 ALLOWED_HOSTS = _get_env_list("ALLOWED_HOSTS", "127.0.0.1,localhost,localhost:8000,localhost:8001,.onrender.com,.vercel.app")
 CSRF_TRUSTED_ORIGINS = _get_env_list("CSRF_TRUSTED_ORIGINS", "https://*.onrender.com,https://*.vercel.app")
@@ -72,13 +88,19 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = "auth.User"
 
 # Email Configuration (Gmail SMTP)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "thakuravaneesh58@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "skvpavairoqrergy")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "BookMySeat <thakuravaneesh58@gmail.com>")
+EMAIL_HOST = _get_env("EMAIL_HOST", "smtp.gmail.com", "SMTP_HOST")
+EMAIL_PORT = int(_get_env("EMAIL_PORT", "587", "SMTP_PORT"))
+EMAIL_USE_TLS = _get_env("EMAIL_USE_TLS", "True").lower() == "true"
+EMAIL_HOST_USER = _get_env("EMAIL_HOST_USER", "", "SMTP_USER")
+EMAIL_HOST_PASSWORD = _get_env("EMAIL_HOST_PASSWORD", "", "SMTP_PASS")
+DEFAULT_FROM_EMAIL = _get_env("DEFAULT_FROM_EMAIL", "", "SMTP_FROM")
+
+if EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 ROOT_URLCONF = "bookmyseat.urls"
 
