@@ -95,20 +95,16 @@
     <!-- ── App Appearance & Recent Bookings ── -->
     <div class="col-lg-7 fade-in-up" style="animation-delay: 0.2s;">
       
-      <!-- Appearance Toggle -->
+      <!-- Appearance -->
       <div class="settings-card mb-4">
         <div class="settings-body d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div>
-            <h5 class="settings-title mb-1 m-0"><i class="fas fa-palette me-2 accent"></i>App Appearance</h5>
-            <p class="text-muted small mb-0 mt-1">Customize your viewing experience</p>
+            <h5 class="settings-title mb-1 m-0"><i class="fas fa-palette me-2 accent"></i>App Theme</h5>
+            <p class="text-muted small mb-0 mt-1">Default cinema viewing experience</p>
           </div>
           
           <div class="theme-switch-wrapper">
-            <span class="theme-label me-2" id="syncThemeLabel">Dark</span>
-            <label class="theme-switch" for="syncThemeToggle">
-              <input type="checkbox" id="syncThemeToggle" checked>
-              <div class="slider round"></div>
-            </label>
+            <span class="badge" style="background:rgba(229,9,20,0.15);border:1px solid rgba(229,9,20,0.3);color:var(--bms-accent);padding:8px 16px;border-radius:8px;font-weight:700;"><i class="fas fa-moon me-1"></i> Dark Theme</span>
           </div>
         </div>
       </div>
@@ -292,43 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Theme Sync Logic ── //
-  // Syncs the profile page toggle with the navbar generic toggle
-  const profileToggle = document.getElementById('syncThemeToggle');
-  const profileLabel = document.getElementById('syncThemeLabel');
-  const root = document.getElementById('htmlRoot');
-  
-  // Read current globally applied theme
-  const currentTheme = root.getAttribute('data-theme') || 'dark';
-  const isDark = currentTheme === 'dark';
-  
-  if(profileToggle) {
-    profileToggle.checked = isDark;
-    profileLabel.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-    
-    profileToggle.addEventListener('change', function() {
-      const wantDark = this.checked;
-      const targetTheme = wantDark ? 'dark' : 'light';
-      
-      // Update global DOM & Storage
-      root.setAttribute('data-theme', targetTheme);
-      localStorage.setItem('bms-theme', targetTheme);
-      
-      // Update local profile UI
-      profileLabel.textContent = wantDark ? 'Dark Mode' : 'Light Mode';
-      
-      // Sync navbar icon (defined in basic.html)
-      const navIcon = document.getElementById('themeIcon');
-      if(navIcon) {
-        navIcon.className = wantDark ? 'fas fa-sun' : 'fas fa-moon';
-      }
-      
-      // Handle the alert dismiss button colors
-      document.querySelectorAll('.btn-close').forEach(btn => {
-        btn.style.filter = wantDark ? 'invert(1)' : 'none';
-      });
-    });
-  }
 });
 </script>
 {% endblock %}

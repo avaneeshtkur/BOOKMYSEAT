@@ -477,12 +477,6 @@
               </li>
             {% endif %}
 
-            <!-- Theme Toggle -->
-            <li class="nav-item ms-2">
-              <button id="themeToggle" aria-label="Toggle theme">
-                <i class="fas fa-sun" id="themeIcon"></i>
-              </button>
-            </li>
           </ul>
         </div>
       </div>
@@ -579,35 +573,11 @@
         else navbar.classList.remove('scrolled');
       });
 
-      // Dark Mode Toggle Logic
+      // Permanent Dark Mode Enforcement
       const root = document.getElementById('htmlRoot');
-      const toggleBtn = document.getElementById('themeToggle');
-      const icon = document.getElementById('themeIcon');
-
-      function applyTheme(theme) {
-        root.setAttribute('data-theme', theme);
-        if (theme === 'dark') {
-          icon.className = 'fas fa-sun';
-          icon.title = "Switch to Light Mode";
-          // If light mode, make logo dark for contrast
-          document.querySelectorAll('.btn-close').forEach(btn => btn.style.filter = 'invert(1)');
-        } else {
-          icon.className = 'fas fa-moon';
-          icon.title = "Switch to Dark Mode";
-          document.querySelectorAll('.btn-close').forEach(btn => btn.style.filter = 'none');
-        }
-      }
-
-      // Read local storage on load
-      const saved = localStorage.getItem('bms-theme') || 'dark';
-      applyTheme(saved);
-
-      toggleBtn.addEventListener('click', () => {
-        const current = root.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem('bms-theme', next);
-      });
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('bms-theme', 'dark');
+      document.querySelectorAll('.btn-close').forEach(btn => btn.style.filter = 'invert(1)');
 
       // Newsletter subscription logic
       const newsletterEmail = document.getElementById('newsletterEmail');
