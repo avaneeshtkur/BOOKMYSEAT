@@ -27,7 +27,7 @@ def register(request):
             user = form.save()
             # Log the user in with the correct backend specified
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect("profile")
+            return redirect("home")
     else:
         form = UserRegisterForm()
     return render(request, "users/register.html", {"form": form})
