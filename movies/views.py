@@ -284,8 +284,7 @@ def release_seats(request):
 def payment_page(request):
     """
     Step 1: User selects seats → POST here.
-    Validates seats, then renders the payment page with Razorpay checkout UI.
-    (Actual Razorpay order is created lazily when user clicks Pay Now)
+    Validates seats, locks them for 10 minutes in DB, and renders the payment page.
     """
     show_id = request.POST.get("show_id")
     seats_json = request.POST.get("seats", "[]")
@@ -299,20 +298,55 @@ def payment_page(request):
         return redirect("movies:movie_list")
 
     show = get_object_or_404(Show, pk=show_id)
+    now = timezone.now()
 
-    # Revalidate seats
-    booked = set(
-        SeatBooking.objects.filter(booking__show=show, booking__status="confirmed")
-        .values_list("row_letter", "seat_number")
-    )
-    valid_seats = []
-    for seat in selected_seats:
-        key = (seat["row"], int(seat["number"]))
-        if key not in booked:
-            valid_seats.append(key)
+    with transaction.atomic():
+        # Cleanup expired locks for this show
+        SeatLock.objects.filter(show=show, expires_at__lte=now).delete()
 
-    if not valid_seats:
-        return redirect("movies:select_seats", show_id=show.pk)
+        # Confirmed booked seats
+        booked = set(
+            SeatBooking.objects.filter(booking__show=show, booking__status="confirmed")
+            .values_list("row_letter", "seat_number")
+        )
+
+        # Active locks by OTHER users
+        locked_by_others = set(
+            SeatLock.objects.filter(show=show, expires_at__gt=now)
+            .exclude(user=request.user)
+            .values_list("row_letter", "seat_number")
+        )
+
+        valid_seats = []
+        conflicts = []
+        for seat in selected_seats:
+            key = (seat["row"], int(seat["number"]))
+            if key in booked or key in locked_by_others:
+                conflicts.append(f"{seat['row']}{seat['number']}")
+            else:
+                valid_seats.append(key)
+
+        if conflicts or not valid_seats:
+            from django.contrib import messages
+            messages.error(
+                request,
+                f"Seats {', '.join(conflicts)} are currently held or booked by another user. Please select available seats."
+            )
+            return redirect("movies:select_seats", show_id=show.pk)
+
+        # Create/Renew 10-minute locks for request.user on this show
+        SeatLock.objects.filter(show=show, user=request.user).delete()
+        new_locks = [
+            SeatLock(
+                show=show,
+                user=request.user,
+                row_letter=r,
+                seat_number=n,
+                expires_at=now + timedelta(minutes=10),
+            )
+            for r, n in valid_seats
+        ]
+        SeatLock.objects.bulk_create(new_locks)
 
     total_price = len(valid_seats) * show.price
 

@@ -38,11 +38,11 @@
               <div class="seats-group">
                 {% for seat in row.seats %}
                 <div
-                  class="seat {% if seat.booked %}booked{% endif %}"
+                  class="seat {% if seat.booked %}booked{% elif seat.locked %}locked{% endif %}"
                   data-row="{{ row.letter }}"
                   data-number="{{ seat.number }}"
-                  {% if not seat.booked %}onclick="toggleSeat(this)"{% endif %}
-                  title="{{ row.letter }}{{ seat.number }}"
+                  {% if not seat.booked and not seat.locked %}onclick="toggleSeat(this)"{% endif %}
+                  title="{% if seat.booked %}Booked{% elif seat.locked %}Held by another user{% else %}{{ row.letter }}{{ seat.number }}{% endif %}"
                 >
                   <span class="seat-num">{{ seat.number }}</span>
                 </div>
@@ -57,6 +57,7 @@
           <div class="seat-legend">
             <div class="legend-item"><div class="legend-box avail"></div> <span class="d-none d-sm-inline">Available</span></div>
             <div class="legend-item"><div class="legend-box sel"></div> <span class="d-none d-sm-inline">Selected</span></div>
+            <div class="legend-item"><div class="legend-box locked-box"></div> <span class="d-none d-sm-inline">Held / Locked</span></div>
             <div class="legend-item"><div class="legend-box bkd"></div> <span class="d-none d-sm-inline">Booked</span></div>
           </div>
         </div>
@@ -252,6 +253,17 @@
   color: rgba(255,255,255,0.2); font-size: 0.8rem; position: absolute;
 }
 
+.seat.locked {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  cursor: not-allowed !important;
+}
+.seat.locked .seat-num { color: transparent !important; }
+.seat.locked::after {
+  content: '\f023'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+  color: #f59e0b; font-size: 0.75rem; position: absolute;
+}
+
 /* ── Legend ── */
 .seat-legend {
   display: flex; justify-content: center; gap: 30px;
@@ -261,6 +273,13 @@
 .legend-box { width: 24px; height: 24px; border-radius: 6px; border: 2px solid transparent; }
 .legend-box.avail { background: var(--bms-input-bg); border-color: rgba(255,255,255,0.1); }
 .legend-box.sel { background: var(--bms-accent); border-color: #ff4040; box-shadow: 0 2px 8px var(--bms-accent-glow); }
+.legend-box.locked-box {
+  background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); position: relative;
+}
+.legend-box.locked-box::after {
+  content: '\f023'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+  color: #f59e0b; font-size: 0.6rem; position: absolute; top:50%; left:50%; transform: translate(-50%,-50%);
+}
 .legend-box.bkd { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); position: relative; }
 .legend-box.bkd::after {
   content: '\f00d'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
@@ -354,5 +373,40 @@
       el.style.color = 'var(--text-muted)';
     }
   }
+
+  // Live polling every 3 seconds to update locked & booked seats in real-time
+  setInterval(async () => {
+    try {
+      const resp = await fetch("{% url 'movies:get_seat_status' show.id %}");
+      if (!resp.ok) return;
+      const data = await resp.json();
+      
+      const bookedSet = new Set(data.booked || []);
+      const lockedDict = data.locked || {};
+
+      document.querySelectorAll('#seatMap .seat').forEach(el => {
+        const row = el.dataset.row;
+        const num = el.dataset.number;
+        const key = row + num;
+
+        if (bookedSet.has(key)) {
+          el.className = 'seat booked';
+          el.removeAttribute('onclick');
+          el.title = 'Booked';
+        } else if (lockedDict[key] && !lockedDict[key].is_mine) {
+          el.className = 'seat locked';
+          el.removeAttribute('onclick');
+          el.title = 'Held by another user';
+        } else if (el.classList.contains('locked') || el.classList.contains('booked')) {
+          // Seat was released by another user
+          el.className = 'seat';
+          el.setAttribute('onclick', 'toggleSeat(this)');
+          el.title = key;
+        }
+      });
+    } catch (e) {
+      // silent catch for background polling
+    }
+  }, 3000);
 </script>
 {% endblock %}
